@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
 import { getGroups, Group, putGroup } from './lib/homee';
 
-export default function main() {
+export default function groups() {
   const [groups, setGroups] = useState<Group[]>([]);
 
   useEffect(() => {
@@ -24,11 +24,11 @@ export default function main() {
           actions={
             <ActionPanel>
               <ActionPanel.Item
-                title="Einschalten"
+                title="Turn On"
                 onAction={() => putGroup(group.id, AttributeType.OnOff, 1)}
               />
               <ActionPanel.Item
-                title="Ausschalten"
+                title="Turn Off"
                 onAction={() => putGroup(group.id, AttributeType.OnOff, 0)}
               />
             </ActionPanel>

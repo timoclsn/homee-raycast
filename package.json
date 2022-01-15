@@ -8,9 +8,24 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "homee Control",
-      "description": "Control your smart home with homee.",
+      "name": "groups",
+      "title": "Groups",
+      "subtitle": "homee",
+      "description": "Control your Groups.",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Devices",
+      "subtitle": "homee",
+      "description": "Control your Devices.",
+      "mode": "view"
+    },
+    {
+      "name": "homeegrams",
+      "title": "Homeegrams",
+      "subtitle": "homee",
+      "description": "Control your Homeegrams.",
       "mode": "view"
     }
   ],

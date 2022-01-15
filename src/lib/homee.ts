@@ -1,10 +1,65 @@
 import WebSocket from 'ws';
-import { AttributeType, GroupCategory } from './enums';
+import {
+  AttributeBasedOn,
+  AttributeChangedBy,
+  AttributeState,
+  AttributeType,
+  CubeType,
+  GroupCategory,
+  NodeProfile,
+  NodeProtocol,
+  NodeState,
+} from './enums';
 import { preferences } from '@raycast/api';
 import fetch from 'node-fetch';
 
 const homeeID = preferences.homeeId?.value as string;
 const accessToken = preferences.accessToken?.value as string;
+
+export interface Node {
+  id: number;
+  name: string;
+  profile: NodeProfile;
+  image: string;
+  favorite: number;
+  order: number;
+  protocol: NodeProtocol;
+  routing: number;
+  state: NodeState;
+  state_changed: number;
+  added: number;
+  history: number;
+  cube_type: CubeType;
+  note: string;
+  services: number;
+  phonetic_name: string;
+  owner: number;
+  security: number;
+  attributes: Attribute[];
+}
+
+export interface Attribute {
+  id: number;
+  node_id: number;
+  instance: number;
+  minimum: number;
+  maximum: number;
+  current_value: number;
+  target_value: number;
+  last_value: number;
+  unit: string;
+  step_value: number;
+  editable: number;
+  type: AttributeType;
+  state: AttributeState;
+  last_changed: number;
+  changed_by: AttributeChangedBy;
+  changed_by_id: number;
+  based_on: AttributeBasedOn;
+  data: string;
+  name: string;
+  options: unknown;
+}
 
 export interface Group {
   id: number;
@@ -13,6 +68,67 @@ export interface Group {
   services: string;
   category: GroupCategory;
   image: string;
+  order: number;
+}
+
+export interface Homeegram {
+  id: number;
+  name: string;
+  phonetic_name: string;
+  image: string;
+  order: number;
+}
+
+export function getNodes() {
+  return new Promise<Node[]>((resolve, reject) => {
+    let nodes: Node[] = [];
+    const ws = new WebSocket(
+      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      'v2'
+    );
+
+    ws.on('error', () => {
+      reject(nodes);
+    });
+
+    ws.on('open', () => {
+      ws.send('GET:nodes');
+    });
+
+    ws.on('message', (data: string) => {
+      const dataObj: { nodes: Node[] } = JSON.parse(data);
+
+      if (dataObj.nodes) {
+        nodes = dataObj.nodes
+          .filter((node) =>
+            node.attributes.find(
+              (attribute) => attribute.type === AttributeType.OnOff
+            )
+          )
+          .map((node) => {
+            return { ...node, name: decodeURIComponent(node.name) };
+          })
+          .sort((a, b) => a.order - b.order);
+        ws.close();
+      }
+    });
+
+    ws.on('close', () => {
+      resolve(nodes);
+    });
+  });
+}
+
+export async function putAttribute(attributeID: number, targetValue: number) {
+  return await fetch(
+    `https://${homeeID}.hom.ee/api/v2/nodes/0/attributes?ids=${attributeID}&target_value=${targetValue}`,
+    {
+      method: 'PUT',
+      headers: {
+        Cookie: accessToken ?? '',
+      },
+    }
+  );
 }
 
 export function getGroups() {
@@ -35,12 +151,12 @@ export function getGroups() {
       const dataObj: { groups: Group[] } = JSON.parse(data);
 
       if (dataObj.groups) {
-        groups = dataObj.groups;
-        groups = groups
+        groups = dataObj.groups
           .filter((group) => group.category === GroupCategory.None)
           .map((group) => {
             return { ...group, name: decodeURIComponent(group.name) };
-          });
+          })
+          .sort((a, b) => a.order - b.order);
         ws.close();
       }
     });
@@ -58,6 +174,53 @@ export async function putGroup(
 ) {
   return await fetch(
     `https://${homeeID}.hom.ee/api/v2/groups/${groupID}?attribute_type=${attributeType}&value=${targetValue}`,
+    {
+      method: 'PUT',
+      headers: {
+        Cookie: accessToken ?? '',
+      },
+    }
+  );
+}
+
+export function getHomeegrams() {
+  return new Promise<Homeegram[]>((resolve, reject) => {
+    let homeegrams: Homeegram[] = [];
+    const ws = new WebSocket(
+      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      'v2'
+    );
+
+    ws.on('error', () => {
+      reject(homeegrams);
+    });
+
+    ws.on('open', () => {
+      ws.send('GET:homeegrams');
+    });
+
+    ws.on('message', (data: string) => {
+      const dataObj: { homeegrams: Homeegram[] } = JSON.parse(data);
+
+      if (dataObj.homeegrams) {
+        homeegrams = dataObj.homeegrams
+          .map((homeegram) => {
+            return { ...homeegram, name: decodeURIComponent(homeegram.name) };
+          })
+          .sort((a, b) => a.order - b.order);
+        ws.close();
+      }
+    });
+
+    ws.on('close', () => {
+      resolve(homeegrams);
+    });
+  });
+}
+
+export async function playHomeegram(homeegramID: number) {
+  return await fetch(
+    `https://${homeeID}.hom.ee/api/v2/homeegrams/${homeegramID}?play=1`,
     {
       method: 'PUT',
       headers: {
