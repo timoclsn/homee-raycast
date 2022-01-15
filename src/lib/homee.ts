@@ -77,6 +77,11 @@ export interface Homeegram {
   phonetic_name: string;
   image: string;
   order: number;
+  triggers: { switch_trigger: number; switch_triggers: Trigger[] };
+}
+
+export interface Trigger {
+  id: number;
 }
 
 export function getNodes() {
@@ -204,6 +209,11 @@ export function getHomeegrams() {
 
       if (dataObj.homeegrams) {
         homeegrams = dataObj.homeegrams
+          .filter((homeegram) =>
+            (homeegram.triggers.switch_triggers || []).some(
+              (trigger: Trigger): boolean => trigger.id > 0
+            )
+          )
           .map((homeegram) => {
             return { ...homeegram, name: decodeURIComponent(homeegram.name) };
           })
