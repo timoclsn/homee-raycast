@@ -56,7 +56,7 @@ export async function putGroup(
   attributeType: AttributeType,
   targetValue: number
 ) {
-  const response = await fetch(
+  return await fetch(
     `https://${homeeID}.hom.ee/api/v2/groups/${groupID}?attribute_type=${attributeType}&value=${targetValue}`,
     {
       method: 'PUT',
@@ -65,6 +65,4 @@ export async function putGroup(
       },
     }
   );
-  console.log(response);
-  return response;
 }
