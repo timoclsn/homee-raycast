@@ -278,38 +278,3 @@ export function getRelationships() {
     });
   });
 }
-
-function getGroupNodes(
-  group: Group,
-  relationships: Relationship[],
-  nodes: Node[]
-) {
-  return relationships.flatMap((relationship) => {
-    if (relationship.group_id === group.id) {
-      return nodes.find((node) => node.id === relationship.node_id) || [];
-    }
-    return [];
-  });
-}
-
-export function isGroupOn(
-  group: Group,
-  relationships: Relationship[],
-  nodes: Node[]
-) {
-  const groupNodes = getGroupNodes(group, relationships, nodes);
-  const onOffNodes = groupNodes.filter((node) =>
-    node.attributes.find((attribute) => attribute.type === AttributeType.OnOff)
-  );
-
-  if (onOffNodes.length === 0) {
-    return false;
-  }
-
-  return onOffNodes.every(
-    (node) =>
-      node.attributes.find(
-        (attribute) => attribute.type === AttributeType.OnOff
-      )?.current_value === 1
-  );
-}
