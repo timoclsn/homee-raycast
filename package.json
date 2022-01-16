@@ -3,7 +3,7 @@
   "name": "homee",
   "title": "homee",
   "description": "Control your smart home with homee.",
-  "icon": "command-icon.png",
+  "icon": "app.png",
   "author": "timoclsn",
   "license": "MIT",
   "commands": [
@@ -12,6 +12,7 @@
       "title": "Groups",
       "subtitle": "homee",
       "description": "Control your Groups.",
+      "icon": "groups.png",
       "mode": "view"
     },
     {
@@ -19,6 +20,7 @@
       "title": "Devices",
       "subtitle": "homee",
       "description": "Control your Devices.",
+      "icon": "devices.png",
       "mode": "view"
     },
     {
@@ -26,6 +28,7 @@
       "title": "Homeegrams",
       "subtitle": "homee",
       "description": "Control your Homeegrams.",
+      "icon": "homeegrams.png",
       "mode": "view"
     }
   ],
