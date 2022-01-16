@@ -1,10 +1,13 @@
-import { ActionPanel, List } from '@raycast/api';
+import { ActionPanel, Color, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
 import { getNodes, Node, putAttribute } from './lib/homee';
 
+const delay = 500;
+
 export default function devices() {
   const [nodes, setNodes] = useState<Node[]>([]);
+  const [count, setCount] = useState(0);
 
   useEffect(() => {
     async function fetchData() {
@@ -13,7 +16,7 @@ export default function devices() {
     }
 
     fetchData();
-  }, []);
+  }, [count]);
 
   return (
     <List isLoading={!nodes.length}>
@@ -21,15 +24,38 @@ export default function devices() {
         <List.Item
           key={node.id}
           title={node.name}
+          icon={{
+            source: Icon.Circle,
+            tintColor:
+              onOff(node)?.current_value === 1
+                ? Color.Yellow
+                : Color.PrimaryText,
+          }}
           actions={
             <ActionPanel>
               <ActionPanel.Item
+                title="Toggle"
+                onAction={() => {
+                  putAttribute(
+                    onOff(node)?.id || 0,
+                    onOff(node)?.current_value === 1 ? 0 : 1
+                  );
+                  setTimeout(() => setCount(count + 1), delay);
+                }}
+              />
+              <ActionPanel.Item
                 title="Turn On"
-                onAction={() => putAttribute(onOffId(node), 1)}
+                onAction={() => {
+                  putAttribute(onOff(node)?.id || 0, 1);
+                  setTimeout(() => setCount(count + 1), delay);
+                }}
               />
               <ActionPanel.Item
                 title="Turn Off"
-                onAction={() => putAttribute(onOffId(node), 0)}
+                onAction={() => {
+                  putAttribute(onOff(node)?.id || 0, 0);
+                  setTimeout(() => setCount(count + 1), delay);
+                }}
               />
             </ActionPanel>
           }
@@ -39,5 +65,5 @@ export default function devices() {
   );
 }
 
-const onOffId = (node: Node) =>
-  node.attributes.find((attr) => attr.type === AttributeType.OnOff)?.id || 0;
+const onOff = (node: Node) =>
+  node.attributes.find((attr) => attr.type === AttributeType.OnOff);

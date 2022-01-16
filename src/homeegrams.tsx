@@ -1,4 +1,4 @@
-import { ActionPanel, List } from '@raycast/api';
+import { ActionPanel, Icon, List } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getHomeegrams, Homeegram, playHomeegram } from './lib/homee';
 
@@ -20,6 +20,7 @@ export default function homeegrams() {
         <List.Item
           key={homeegram.id}
           title={homeegram.name}
+          icon={Icon.ArrowRight}
           actions={
             <ActionPanel>
               <ActionPanel.Item

@@ -80,8 +80,16 @@ export interface Homeegram {
   triggers: { switch_trigger: number; switch_triggers: Trigger[] };
 }
 
-export interface Trigger {
+interface Trigger {
   id: number;
+}
+
+export interface Relationship {
+  id: number;
+  group_id: number;
+  node_id: number;
+  homeegram_id: number;
+  order: number;
 }
 
 export function getNodes() {
@@ -237,5 +245,71 @@ export async function playHomeegram(homeegramID: number) {
         Cookie: accessToken ?? '',
       },
     }
+  );
+}
+
+export function getRelationships() {
+  return new Promise<Relationship[]>((resolve, reject) => {
+    let relationships: Relationship[] = [];
+    const ws = new WebSocket(
+      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      'v2'
+    );
+
+    ws.on('error', () => {
+      reject(relationships);
+    });
+
+    ws.on('open', () => {
+      ws.send('GET:relationships');
+    });
+
+    ws.on('message', (data: string) => {
+      const dataObj: { relationships: Relationship[] } = JSON.parse(data);
+
+      if (dataObj.relationships) {
+        relationships = dataObj.relationships;
+        ws.close();
+      }
+    });
+
+    ws.on('close', () => {
+      resolve(relationships);
+    });
+  });
+}
+
+function getGroupNodes(
+  group: Group,
+  relationships: Relationship[],
+  nodes: Node[]
+) {
+  return relationships.flatMap((relationship) => {
+    if (relationship.group_id === group.id) {
+      return nodes.find((node) => node.id === relationship.node_id) || [];
+    }
+    return [];
+  });
+}
+
+export function isGroupOn(
+  group: Group,
+  relationships: Relationship[],
+  nodes: Node[]
+) {
+  const groupNodes = getGroupNodes(group, relationships, nodes);
+  const onOffNodes = groupNodes.filter((node) =>
+    node.attributes.find((attribute) => attribute.type === AttributeType.OnOff)
+  );
+
+  if (onOffNodes.length === 0) {
+    return false;
+  }
+
+  return onOffNodes.every(
+    (node) =>
+      node.attributes.find(
+        (attribute) => attribute.type === AttributeType.OnOff
+      )?.current_value === 1
   );
 }
