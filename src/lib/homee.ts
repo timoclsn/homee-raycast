@@ -113,7 +113,7 @@ export function getNodes() {
           .map((node) => {
             return { ...node, name: decodeURIComponent(node.name) };
           })
-          .sort((a, b) => a.name.localeCompare(b.name));
+          .sort((a, b) => a.order - b.order);
         ws.close();
       }
     });
@@ -161,7 +161,7 @@ export function getGroups() {
           .map((group) => {
             return { ...group, name: decodeURIComponent(group.name) };
           })
-          .sort((a, b) => a.name.localeCompare(b.name));
+          .sort((a, b) => a.order - b.order);
         ws.close();
       }
     });
@@ -217,7 +217,7 @@ export function getHomeegrams() {
           .map((homeegram) => {
             return { ...homeegram, name: decodeURIComponent(homeegram.name) };
           })
-          .sort((a, b) => a.name.localeCompare(b.name));
+          .sort((a, b) => a.order - b.order);
         ws.close();
       }
     });
