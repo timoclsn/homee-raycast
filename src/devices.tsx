@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
 import { getNodes, Node, putAttribute } from './lib/homee';
 
-const delay = 500;
+const delay = 200;
 
 export default function devices() {
   const [nodes, setNodes] = useState<Node[]>([]);
@@ -27,7 +27,7 @@ export default function devices() {
           icon={{
             source: Icon.Circle,
             tintColor:
-              onOff(node)?.current_value === 1
+              onOff(node)?.target_value === 1
                 ? Color.Yellow
                 : Color.PrimaryText,
           }}
@@ -38,7 +38,7 @@ export default function devices() {
                 onAction={() => {
                   putAttribute(
                     onOff(node)?.id || 0,
-                    onOff(node)?.current_value === 1 ? 0 : 1
+                    onOff(node)?.target_value === 1 ? 0 : 1
                   );
                   setTimeout(() => setCount(count + 1), delay);
                 }}

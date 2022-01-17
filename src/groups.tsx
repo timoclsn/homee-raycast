@@ -11,7 +11,7 @@ import {
   getRelationships,
 } from './lib/homee';
 
-const delay = 500;
+const delay = 200;
 
 export default function groups() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -124,6 +124,6 @@ export function isGroupOn(
     (node) =>
       node.attributes.find(
         (attribute) => attribute.type === AttributeType.OnOff
-      )?.current_value === 1
+      )?.target_value === 1
   );
 }
