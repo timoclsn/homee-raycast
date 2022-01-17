@@ -4,6 +4,8 @@ import {
   Icon,
   List,
   setLocalStorageItem,
+  showToast,
+  ToastStyle,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getHomeegrams, Homeegram, playHomeegram } from './lib/homee';
@@ -27,10 +29,15 @@ export default function homeegrams() {
 
   useEffect(() => {
     async function fetchData() {
-      const homeegramsData = await getHomeegrams();
-      setHomeegrams(homeegramsData);
-      setIsCached(false);
-      await setLocalStorageItem('homeegrams', JSON.stringify(homeegramsData));
+      const homeegramsData = await getHomeegrams().catch(async () => {
+        await showToast(ToastStyle.Failure, 'Could not fetch homeegrams.');
+      });
+
+      if (homeegramsData) {
+        setHomeegrams(homeegramsData);
+        setIsCached(false);
+        await setLocalStorageItem('homeegrams', JSON.stringify(homeegramsData));
+      }
     }
 
     fetchData();

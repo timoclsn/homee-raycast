@@ -5,6 +5,8 @@ import {
   Icon,
   List,
   setLocalStorageItem,
+  showToast,
+  ToastStyle,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
@@ -60,13 +62,18 @@ export default function groups() {
 
   useEffect(() => {
     async function fetchData() {
-      const groupsData = await getGroups();
-      setGroups(groupsData);
-      setIsCached((prev) => ({
-        ...prev,
-        groups: false,
-      }));
-      await setLocalStorageItem('groups', JSON.stringify(groupsData));
+      const groupsData = await getGroups().catch(async () => {
+        await showToast(ToastStyle.Failure, 'Could not fetch groups.');
+      });
+
+      if (groupsData) {
+        setGroups(groupsData);
+        setIsCached((prev) => ({
+          ...prev,
+          groups: false,
+        }));
+        await setLocalStorageItem('groups', JSON.stringify(groupsData));
+      }
     }
 
     fetchData();
@@ -74,13 +81,18 @@ export default function groups() {
 
   useEffect(() => {
     async function fetchData() {
-      const nodesData = await getNodes();
-      setNodes(nodesData);
-      setIsCached((prev) => ({
-        ...prev,
-        nodes: false,
-      }));
-      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
+      const nodesData = await getNodes().catch(async () => {
+        await showToast(ToastStyle.Failure, 'Could not fetch devices.');
+      });
+
+      if (nodesData) {
+        setNodes(nodesData);
+        setIsCached((prev) => ({
+          ...prev,
+          nodes: false,
+        }));
+        await setLocalStorageItem('nodes', JSON.stringify(nodesData));
+      }
     }
 
     fetchData();
@@ -88,16 +100,21 @@ export default function groups() {
 
   useEffect(() => {
     async function fetchData() {
-      const relationshipsData = await getRelationships();
-      setRelationships(relationshipsData);
-      setIsCached((prev) => ({
-        ...prev,
-        relationships: false,
-      }));
-      await setLocalStorageItem(
-        'relationships',
-        JSON.stringify(relationshipsData)
-      );
+      const relationshipsData = await getRelationships().catch(async () => {
+        await showToast(ToastStyle.Failure, 'Could not fetch relationships.');
+      });
+
+      if (relationshipsData) {
+        setRelationships(relationshipsData);
+        setIsCached((prev) => ({
+          ...prev,
+          relationships: false,
+        }));
+        await setLocalStorageItem(
+          'relationships',
+          JSON.stringify(relationshipsData)
+        );
+      }
     }
 
     fetchData();

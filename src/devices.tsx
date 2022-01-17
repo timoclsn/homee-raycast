@@ -5,6 +5,8 @@ import {
   Icon,
   List,
   setLocalStorageItem,
+  showToast,
+  ToastStyle,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
@@ -32,10 +34,15 @@ export default function devices() {
 
   useEffect(() => {
     async function fetchData() {
-      const nodesData = await getNodes();
-      setNodes(nodesData);
-      setIsCached(false);
-      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
+      const nodesData = await getNodes().catch(async () => {
+        await showToast(ToastStyle.Failure, 'Could not fetch devices.');
+      });
+
+      if (nodesData) {
+        setNodes(nodesData);
+        setIsCached(false);
+        await setLocalStorageItem('nodes', JSON.stringify(nodesData));
+      }
     }
 
     fetchData();
