@@ -59,6 +59,7 @@ export default function devices() {
             <ActionPanel>
               <ActionPanel.Item
                 title="Toggle"
+                shortcut={{ modifiers: [], key: 'enter' }}
                 onAction={() => {
                   putAttribute(
                     onOff(node)?.id || 0,
@@ -69,6 +70,7 @@ export default function devices() {
               />
               <ActionPanel.Item
                 title="Turn On"
+                shortcut={{ modifiers: ['cmd'], key: 'enter' }}
                 onAction={() => {
                   putAttribute(onOff(node)?.id || 0, 1);
                   setTimeout(() => setCount(count + 1), delay);
@@ -76,6 +78,7 @@ export default function devices() {
               />
               <ActionPanel.Item
                 title="Turn Off"
+                shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                 onAction={() => {
                   putAttribute(onOff(node)?.id || 0, 0);
                   setTimeout(() => setCount(count + 1), delay);

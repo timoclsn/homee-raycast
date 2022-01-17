@@ -124,6 +124,7 @@ export default function groups() {
             <ActionPanel>
               <ActionPanel.Item
                 title="Toggle"
+                shortcut={{ modifiers: [], key: 'enter' }}
                 onAction={() => {
                   putGroup(
                     group.id,
@@ -139,6 +140,7 @@ export default function groups() {
               />
               <ActionPanel.Item
                 title="Turn On"
+                shortcut={{ modifiers: ['cmd'], key: 'enter' }}
                 onAction={() => {
                   putGroup(group.id, AttributeType.OnOff, 1);
                   setTimeout(() => setCount(count + 1), delay);
@@ -146,6 +148,7 @@ export default function groups() {
               />
               <ActionPanel.Item
                 title="Turn Off"
+                shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                 onAction={() => {
                   putGroup(group.id, AttributeType.OnOff, 0);
                   setTimeout(() => setCount(count + 1), delay);

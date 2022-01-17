@@ -47,6 +47,7 @@ export default function homeegrams() {
             <ActionPanel>
               <ActionPanel.Item
                 title="Play"
+                shortcut={{ modifiers: [], key: 'enter' }}
                 onAction={() => playHomeegram(homeegram.id)}
               />
             </ActionPanel>
