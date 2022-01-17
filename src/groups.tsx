@@ -164,19 +164,14 @@ function getGroupNodes(
   relationships: Relationship[],
   nodes: Node[]
 ) {
-  return relationships.flatMap((relationship) => {
-    if (relationship.group_id === group.id) {
-      return nodes.find((node) => node.id === relationship.node_id) || [];
-    }
-    return [];
-  });
+  return relationships.flatMap((relationship) =>
+    relationship.group_id === group.id
+      ? nodes.find((node) => node.id === relationship.node_id) || []
+      : []
+  );
 }
 
-export function isGroupOn(
-  group: Group,
-  relationships: Relationship[],
-  nodes: Node[]
-) {
+function isGroupOn(group: Group, relationships: Relationship[], nodes: Node[]) {
   const groupNodes = getGroupNodes(group, relationships, nodes);
   const onOffNodes = groupNodes.filter((node) =>
     node.attributes.find((attribute) => attribute.type === AttributeType.OnOff)
