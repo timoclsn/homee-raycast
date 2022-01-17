@@ -1,4 +1,11 @@
-import { ActionPanel, Color, Icon, List } from '@raycast/api';
+import {
+  ActionPanel,
+  Color,
+  getLocalStorageItem,
+  Icon,
+  List,
+  setLocalStorageItem,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
 import {
@@ -17,21 +24,49 @@ export default function groups() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [nodes, setNodes] = useState<Node[]>([]);
   const [relationships, setRelationships] = useState<Relationship[]>([]);
+  const [isCached, setIsCached] = useState({
+    groups: true,
+    nodes: true,
+    relationships: true,
+  });
   const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    async function loadData() {
+      const cachedGroups: string | undefined = await getLocalStorageItem(
+        'groups'
+      );
+      if (cachedGroups && !groups.length) {
+        setGroups(JSON.parse(cachedGroups));
+      }
+
+      const cachedNodes: string | undefined = await getLocalStorageItem(
+        'nodes'
+      );
+      if (cachedNodes && !nodes.length) {
+        setNodes(JSON.parse(cachedNodes));
+      }
+
+      const cachedRelationships: string | undefined = await getLocalStorageItem(
+        'relationships'
+      );
+      if (cachedRelationships && !relationships.length) {
+        setRelationships(JSON.parse(cachedRelationships));
+      }
+    }
+
+    loadData();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
       const groupsData = await getGroups();
       setGroups(groupsData);
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    async function fetchData() {
-      const relationshipsData = await getRelationships();
-      setRelationships(relationshipsData);
+      setIsCached((prev) => ({
+        ...prev,
+        groups: false,
+      }));
+      await setLocalStorageItem('groups', JSON.stringify(groupsData));
     }
 
     fetchData();
@@ -41,20 +76,47 @@ export default function groups() {
     async function fetchData() {
       const nodesData = await getNodes();
       setNodes(nodesData);
+      setIsCached((prev) => ({
+        ...prev,
+        nodes: false,
+      }));
+      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
     }
 
     fetchData();
   }, [count]);
 
+  useEffect(() => {
+    async function fetchData() {
+      const relationshipsData = await getRelationships();
+      setRelationships(relationshipsData);
+      setIsCached((prev) => ({
+        ...prev,
+        relationships: false,
+      }));
+      await setLocalStorageItem(
+        'relationships',
+        JSON.stringify(relationshipsData)
+      );
+    }
+
+    fetchData();
+  }, []);
+
+  const isSomeCached = () =>
+    Object.values(isCached).some((value) => value === true);
+
   return (
-    <List isLoading={!groups.length}>
+    <List isLoading={!groups.length || isSomeCached()}>
       {groups.map((group) => (
         <List.Item
           key={group.id}
           title={group.name}
           icon={{
             source: Icon.Circle,
-            tintColor: isGroupOn(group, relationships, nodes)
+            tintColor: isSomeCached()
+              ? Color.PrimaryText
+              : isGroupOn(group, relationships, nodes)
               ? Color.Yellow
               : Color.PrimaryText,
           }}
@@ -66,7 +128,11 @@ export default function groups() {
                   putGroup(
                     group.id,
                     AttributeType.OnOff,
-                    isGroupOn(group, relationships, nodes) ? 0 : 1
+                    isSomeCached()
+                      ? 1
+                      : isGroupOn(group, relationships, nodes)
+                      ? 0
+                      : 1
                   );
                   setTimeout(() => setCount(count + 1), delay);
                 }}

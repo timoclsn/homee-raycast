@@ -1,4 +1,11 @@
-import { ActionPanel, Color, Icon, List } from '@raycast/api';
+import {
+  ActionPanel,
+  Color,
+  getLocalStorageItem,
+  Icon,
+  List,
+  setLocalStorageItem,
+} from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
 import { getNodes, Node, putAttribute } from './lib/homee';
@@ -7,29 +14,46 @@ const delay = 200;
 
 export default function devices() {
   const [nodes, setNodes] = useState<Node[]>([]);
+  const [isCached, setIsCached] = useState(true);
   const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    async function loadData() {
+      const cachedNodes: string | undefined = await getLocalStorageItem(
+        'nodes'
+      );
+      if (cachedNodes && !nodes.length) {
+        setNodes(JSON.parse(cachedNodes));
+      }
+    }
+
+    loadData();
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
       const nodesData = await getNodes();
       setNodes(nodesData);
+      setIsCached(false);
+      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
     }
 
     fetchData();
   }, [count]);
 
   return (
-    <List isLoading={!nodes.length}>
+    <List isLoading={!nodes.length || isCached}>
       {nodes.map((node) => (
         <List.Item
           key={node.id}
           title={node.name}
           icon={{
             source: Icon.Circle,
-            tintColor:
-              onOff(node)?.target_value === 1
-                ? Color.Yellow
-                : Color.PrimaryText,
+            tintColor: isCached
+              ? Color.PrimaryText
+              : onOff(node)?.target_value === 1
+              ? Color.Yellow
+              : Color.PrimaryText,
           }}
           actions={
             <ActionPanel>
@@ -38,7 +62,7 @@ export default function devices() {
                 onAction={() => {
                   putAttribute(
                     onOff(node)?.id || 0,
-                    onOff(node)?.target_value === 1 ? 0 : 1
+                    isCached ? 1 : onOff(node)?.target_value === 1 ? 0 : 1
                   );
                   setTimeout(() => setCount(count + 1), delay);
                 }}
