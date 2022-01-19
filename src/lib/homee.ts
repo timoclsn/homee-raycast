@@ -92,6 +92,8 @@ export interface Relationship {
   order: number;
 }
 
+export const controlDelay = 200;
+
 export function getNodes() {
   return new Promise<Node[]>((resolve, reject) => {
     let nodes: Node[] = [];

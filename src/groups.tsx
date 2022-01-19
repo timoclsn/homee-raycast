@@ -18,9 +18,9 @@ import {
   putGroup,
   Relationship,
   getRelationships,
+  controlDelay,
 } from './lib/homee';
-
-const delay = 200;
+import { waitFor } from './lib/utils';
 
 export default function groups() {
   const [groups, setGroups] = useState<Group[]>([]);
@@ -33,95 +33,103 @@ export default function groups() {
   });
   const [count, setCount] = useState(0);
 
-  useEffect(() => {
-    async function loadData() {
-      const cachedGroups: string | undefined = await getLocalStorageItem(
-        'groups'
-      );
-      if (cachedGroups && !groups.length) {
-        setGroups(JSON.parse(cachedGroups));
-      }
+  function updateData() {
+    setCount((prev) => prev + 1);
+  }
 
-      const cachedNodes: string | undefined = await getLocalStorageItem(
-        'nodes'
-      );
-      if (cachedNodes && !nodes.length) {
-        setNodes(JSON.parse(cachedNodes));
-      }
-
-      const cachedRelationships: string | undefined = await getLocalStorageItem(
-        'relationships'
-      );
-      if (cachedRelationships && !relationships.length) {
-        setRelationships(JSON.parse(cachedRelationships));
-      }
+  async function loadCache() {
+    const cachedGroups: string | undefined = await getLocalStorageItem(
+      'groups'
+    );
+    if (cachedGroups && !groups.length) {
+      setGroups(JSON.parse(cachedGroups));
     }
 
-    loadData();
+    const cachedNodes: string | undefined = await getLocalStorageItem('nodes');
+    if (cachedNodes && !nodes.length) {
+      setNodes(JSON.parse(cachedNodes));
+    }
+
+    const cachedRelationships: string | undefined = await getLocalStorageItem(
+      'relationships'
+    );
+    if (cachedRelationships && !relationships.length) {
+      setRelationships(JSON.parse(cachedRelationships));
+    }
+  }
+
+  async function fetchGroups() {
+    const groupsData = await getGroups().catch(async () => {
+      await showToast(ToastStyle.Failure, 'Could not fetch groups.');
+    });
+
+    if (groupsData) {
+      setGroups(groupsData);
+      setIsCached((prev) => ({
+        ...prev,
+        groups: false,
+      }));
+      await setLocalStorageItem('groups', JSON.stringify(groupsData));
+    }
+  }
+
+  async function fetchNodes() {
+    const nodesData = await getNodes().catch(async () => {
+      await showToast(ToastStyle.Failure, 'Could not fetch devices.');
+    });
+
+    if (nodesData) {
+      setNodes(nodesData);
+      setIsCached((prev) => ({
+        ...prev,
+        nodes: false,
+      }));
+      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
+    }
+  }
+
+  async function fetchRelationships() {
+    const relationshipsData = await getRelationships().catch(async () => {
+      await showToast(ToastStyle.Failure, 'Could not fetch relationships.');
+    });
+
+    if (relationshipsData) {
+      setRelationships(relationshipsData);
+      setIsCached((prev) => ({
+        ...prev,
+        relationships: false,
+      }));
+      await setLocalStorageItem(
+        'relationships',
+        JSON.stringify(relationshipsData)
+      );
+    }
+  }
+
+  useEffect(() => {
+    loadCache();
+    fetchGroups();
+    fetchRelationships();
   }, []);
 
   useEffect(() => {
-    async function fetchData() {
-      const groupsData = await getGroups().catch(async () => {
-        await showToast(ToastStyle.Failure, 'Could not fetch groups.');
-      });
-
-      if (groupsData) {
-        setGroups(groupsData);
-        setIsCached((prev) => ({
-          ...prev,
-          groups: false,
-        }));
-        await setLocalStorageItem('groups', JSON.stringify(groupsData));
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    async function fetchData() {
-      const nodesData = await getNodes().catch(async () => {
-        await showToast(ToastStyle.Failure, 'Could not fetch devices.');
-      });
-
-      if (nodesData) {
-        setNodes(nodesData);
-        setIsCached((prev) => ({
-          ...prev,
-          nodes: false,
-        }));
-        await setLocalStorageItem('nodes', JSON.stringify(nodesData));
-      }
-    }
-
-    fetchData();
+    fetchNodes();
   }, [count]);
-
-  useEffect(() => {
-    async function fetchData() {
-      const relationshipsData = await getRelationships().catch(async () => {
-        await showToast(ToastStyle.Failure, 'Could not fetch relationships.');
-      });
-
-      if (relationshipsData) {
-        setRelationships(relationshipsData);
-        setIsCached((prev) => ({
-          ...prev,
-          relationships: false,
-        }));
-        await setLocalStorageItem(
-          'relationships',
-          JSON.stringify(relationshipsData)
-        );
-      }
-    }
-
-    fetchData();
-  }, []);
 
   const isSomeCached = () =>
     Object.values(isCached).some((value) => value === true);
+
+  const tintColor = (group: Group) => {
+    if (isSomeCached()) return Color.PrimaryText;
+    if (isGroupOn(group, relationships, nodes)) return Color.Yellow;
+    return Color.PrimaryText;
+  };
+
+  const toggleValue = (group: Group) => {
+    if (isSomeCached()) return 1;
+    if (isGroupOn(group, relationships, nodes)) return 0;
+    return 1;
+  };
 
   return (
     <List isLoading={!groups.length || isSomeCached()}>
@@ -131,44 +139,35 @@ export default function groups() {
           title={group.name}
           icon={{
             source: Icon.Circle,
-            tintColor: isSomeCached()
-              ? Color.PrimaryText
-              : isGroupOn(group, relationships, nodes)
-              ? Color.Yellow
-              : Color.PrimaryText,
+            tintColor: tintColor(group),
           }}
           actions={
             <ActionPanel>
               <ActionPanel.Item
                 title="Toggle"
                 shortcut={{ modifiers: [], key: 'enter' }}
-                onAction={() => {
-                  putGroup(
-                    group.id,
-                    AttributeType.OnOff,
-                    isSomeCached()
-                      ? 1
-                      : isGroupOn(group, relationships, nodes)
-                      ? 0
-                      : 1
-                  );
-                  setTimeout(() => setCount(count + 1), delay);
+                onAction={async () => {
+                  putGroup(group.id, AttributeType.OnOff, toggleValue(group));
+                  await waitFor(controlDelay);
+                  updateData();
                 }}
               />
               <ActionPanel.Item
                 title="Turn On"
                 shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-                onAction={() => {
+                onAction={async () => {
                   putGroup(group.id, AttributeType.OnOff, 1);
-                  setTimeout(() => setCount(count + 1), delay);
+                  await waitFor(controlDelay);
+                  updateData();
                 }}
               />
               <ActionPanel.Item
                 title="Turn Off"
                 shortcut={{ modifiers: ['cmd'], key: 'delete' }}
-                onAction={() => {
+                onAction={async () => {
                   putGroup(group.id, AttributeType.OnOff, 0);
-                  setTimeout(() => setCount(count + 1), delay);
+                  await waitFor(controlDelay);
+                  updateData();
                 }}
               />
             </ActionPanel>
@@ -193,13 +192,12 @@ function getGroupNodes(
 
 function isGroupOn(group: Group, relationships: Relationship[], nodes: Node[]) {
   const groupNodes = getGroupNodes(group, relationships, nodes);
+
   const onOffNodes = groupNodes.filter((node) =>
     node.attributes.find((attribute) => attribute.type === AttributeType.OnOff)
   );
 
-  if (onOffNodes.length === 0) {
-    return false;
-  }
+  if (onOffNodes.length === 0) return false;
 
   return onOffNodes.every(
     (node) =>

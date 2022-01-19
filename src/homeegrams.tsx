@@ -14,33 +14,29 @@ export default function homeegrams() {
   const [homeegrams, setHomeegrams] = useState<Homeegram[]>([]);
   const [isCached, setIsCached] = useState(true);
 
-  useEffect(() => {
-    async function loadData() {
-      const cachedHomeegrams: string | undefined = await getLocalStorageItem(
-        'homeegrams'
-      );
-      if (cachedHomeegrams && !homeegrams.length) {
-        setHomeegrams(JSON.parse(cachedHomeegrams));
-      }
+  async function loadCache() {
+    const cachedHomeegrams: string | undefined = await getLocalStorageItem(
+      'homeegrams'
+    );
+    if (cachedHomeegrams && !homeegrams.length) {
+      setHomeegrams(JSON.parse(cachedHomeegrams));
     }
+  }
 
-    loadData();
-  }, []);
+  async function fetchHomeegrams() {
+    const homeegramsData = await getHomeegrams().catch(async () => {
+      await showToast(ToastStyle.Failure, 'Could not fetch homeegrams.');
+    });
 
-  useEffect(() => {
-    async function fetchData() {
-      const homeegramsData = await getHomeegrams().catch(async () => {
-        await showToast(ToastStyle.Failure, 'Could not fetch homeegrams.');
-      });
-
-      if (homeegramsData) {
-        setHomeegrams(homeegramsData);
-        setIsCached(false);
-        await setLocalStorageItem('homeegrams', JSON.stringify(homeegramsData));
-      }
+    if (homeegramsData) {
+      setHomeegrams(homeegramsData);
+      setIsCached(false);
+      await setLocalStorageItem('homeegrams', JSON.stringify(homeegramsData));
     }
-
-    fetchData();
+  }
+  useEffect(() => {
+    loadCache();
+    fetchHomeegrams();
   }, []);
 
   return (
