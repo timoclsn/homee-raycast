@@ -1,179 +1,129 @@
 import {
   ActionPanel,
   Color,
-  getLocalStorageItem,
   Icon,
   List,
-  setLocalStorageItem,
   showToast,
   ToastStyle,
 } from '@raycast/api';
-import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
-import {
-  getGroups,
-  getNodes,
-  Node,
-  Group,
-  putGroup,
-  Relationship,
-  getRelationships,
-  controlDelay,
-} from './lib/homee';
+import { Node, Group, Relationship, controlDelay } from './lib/homee';
 import { waitFor } from './lib/utils';
+import { useGroups } from './hooks/useGroups';
+import { useNodes } from './hooks/useNodes';
+import { useRelationships } from './hooks/useRelationships';
 
 export default function groups() {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [relationships, setRelationships] = useState<Relationship[]>([]);
-  const [isCached, setIsCached] = useState({
-    groups: true,
-    nodes: true,
-    relationships: true,
-  });
-  const [count, setCount] = useState(0);
+  const {
+    isLoading: groupsIsLoading,
+    isCached: groupsIsCached,
+    isSuccess: groupsIsSuccess,
+    isError: groupsIsError,
+    data: groups,
+    control: groupsControl,
+  } = useGroups();
 
-  function updateData() {
-    setCount((prev) => prev + 1);
-  }
+  const {
+    isLoading: nodesIsLoading,
+    isCached: nodesIsCached,
+    isSuccess: nodesIsSuccess,
+    isError: nodesIsError,
+    data: nodes,
+    refetch: nodesRefetch,
+  } = useNodes();
 
-  async function loadCache() {
-    const cachedGroups: string | undefined = await getLocalStorageItem(
-      'groups'
+  const {
+    isLoading: relationshipsIsLoading,
+    isCached: relationshipsIsCached,
+    isSuccess: relationshipsIsSuccess,
+    isError: relationshipsIsError,
+    data: relationships,
+  } = useRelationships();
+
+  const isCached = () =>
+    [groupsIsCached, nodesIsCached, relationshipsIsCached].some(
+      (value) => value === true
     );
-    if (cachedGroups && !groups.length) {
-      setGroups(JSON.parse(cachedGroups));
-    }
 
-    const cachedNodes: string | undefined = await getLocalStorageItem('nodes');
-    if (cachedNodes && !nodes.length) {
-      setNodes(JSON.parse(cachedNodes));
-    }
-
-    const cachedRelationships: string | undefined = await getLocalStorageItem(
-      'relationships'
+  const isLoading = () =>
+    [groupsIsLoading, nodesIsLoading, relationshipsIsLoading].some(
+      (value) => value === true
     );
-    if (cachedRelationships && !relationships.length) {
-      setRelationships(JSON.parse(cachedRelationships));
-    }
+
+  const isError = () =>
+    [groupsIsError, nodesIsError, relationshipsIsError].some(
+      (value) => value === true
+    );
+
+  const isSuccess = () =>
+    [groupsIsSuccess, nodesIsSuccess, relationshipsIsSuccess].every(
+      (value) => value === true
+    );
+
+  if (isError()) {
+    showToast(ToastStyle.Failure, 'Could not fetch groups.');
   }
-
-  async function fetchGroups() {
-    const groupsData = await getGroups().catch(async () => {
-      await showToast(ToastStyle.Failure, 'Could not fetch groups.');
-    });
-
-    if (groupsData) {
-      setGroups(groupsData);
-      setIsCached((prev) => ({
-        ...prev,
-        groups: false,
-      }));
-      await setLocalStorageItem('groups', JSON.stringify(groupsData));
-    }
-  }
-
-  async function fetchNodes() {
-    const nodesData = await getNodes().catch(async () => {
-      await showToast(ToastStyle.Failure, 'Could not fetch devices.');
-    });
-
-    if (nodesData) {
-      setNodes(nodesData);
-      setIsCached((prev) => ({
-        ...prev,
-        nodes: false,
-      }));
-      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
-    }
-  }
-
-  async function fetchRelationships() {
-    const relationshipsData = await getRelationships().catch(async () => {
-      await showToast(ToastStyle.Failure, 'Could not fetch relationships.');
-    });
-
-    if (relationshipsData) {
-      setRelationships(relationshipsData);
-      setIsCached((prev) => ({
-        ...prev,
-        relationships: false,
-      }));
-      await setLocalStorageItem(
-        'relationships',
-        JSON.stringify(relationshipsData)
-      );
-    }
-  }
-
-  useEffect(() => {
-    loadCache();
-    fetchGroups();
-    fetchRelationships();
-  }, []);
-
-  useEffect(() => {
-    fetchNodes();
-  }, [count]);
-
-  const isSomeCached = () =>
-    Object.values(isCached).some((value) => value === true);
 
   const tintColor = (group: Group) => {
-    if (isSomeCached()) return Color.PrimaryText;
+    if (isCached()) return Color.PrimaryText;
     if (isGroupOn(group, relationships, nodes)) return Color.Yellow;
     return Color.PrimaryText;
   };
 
   const toggleValue = (group: Group) => {
-    if (isSomeCached()) return 1;
+    if (isCached()) return 1;
     if (isGroupOn(group, relationships, nodes)) return 0;
     return 1;
   };
 
   return (
-    <List isLoading={!groups.length || isSomeCached()}>
-      {groups.map((group) => (
-        <List.Item
-          key={group.id}
-          title={group.name}
-          icon={{
-            source: Icon.Circle,
-            tintColor: tintColor(group),
-          }}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Toggle"
-                shortcut={{ modifiers: [], key: 'enter' }}
-                onAction={async () => {
-                  putGroup(group.id, AttributeType.OnOff, toggleValue(group));
-                  await waitFor(controlDelay);
-                  updateData();
-                }}
-              />
-              <ActionPanel.Item
-                title="Turn On"
-                shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-                onAction={async () => {
-                  putGroup(group.id, AttributeType.OnOff, 1);
-                  await waitFor(controlDelay);
-                  updateData();
-                }}
-              />
-              <ActionPanel.Item
-                title="Turn Off"
-                shortcut={{ modifiers: ['cmd'], key: 'delete' }}
-                onAction={async () => {
-                  putGroup(group.id, AttributeType.OnOff, 0);
-                  await waitFor(controlDelay);
-                  updateData();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={isLoading()}>
+      {(isCached() || isSuccess()) &&
+        groups.map((group) => (
+          <List.Item
+            key={group.id}
+            title={group.name}
+            icon={{
+              source: Icon.Circle,
+              tintColor: tintColor(group),
+            }}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Toggle"
+                  shortcut={{ modifiers: [], key: 'enter' }}
+                  onAction={async () => {
+                    groupsControl(
+                      group.id,
+                      AttributeType.OnOff,
+                      toggleValue(group)
+                    );
+                    await waitFor(controlDelay);
+                    nodesRefetch();
+                  }}
+                />
+                <ActionPanel.Item
+                  title="Turn On"
+                  shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+                  onAction={async () => {
+                    groupsControl(group.id, AttributeType.OnOff, 1);
+                    await waitFor(controlDelay);
+                    nodesRefetch();
+                  }}
+                />
+                <ActionPanel.Item
+                  title="Turn Off"
+                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  onAction={async () => {
+                    groupsControl(group.id, AttributeType.OnOff, 0);
+                    await waitFor(controlDelay);
+                    nodesRefetch();
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }

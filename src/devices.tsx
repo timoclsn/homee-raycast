@@ -1,53 +1,28 @@
 import {
   ActionPanel,
   Color,
-  getLocalStorageItem,
   Icon,
   List,
-  setLocalStorageItem,
   showToast,
   ToastStyle,
 } from '@raycast/api';
-import { useEffect, useState } from 'react';
 import { AttributeType } from './lib/enums';
-import { controlDelay, getNodes, Node, putAttribute } from './lib/homee';
-import { waitFor } from './lib/utils';
+import { Node } from './lib/homee';
+import { useNodes } from './hooks/useNodes';
 
 export default function devices() {
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [isCached, setIsCached] = useState(true);
-  const [count, setCount] = useState(0);
+  const {
+    data: nodes,
+    isLoading,
+    isCached,
+    isSuccess,
+    isError,
+    control,
+  } = useNodes();
 
-  function updateData() {
-    setCount((prev) => prev + 1);
+  if (isError) {
+    showToast(ToastStyle.Failure, 'Could not fetch devices.');
   }
-
-  async function loadCache() {
-    const cachedNodes: string | undefined = await getLocalStorageItem('nodes');
-    if (cachedNodes && !nodes.length) {
-      setNodes(JSON.parse(cachedNodes));
-    }
-  }
-
-  async function fetchNodes() {
-    const nodesData = await getNodes().catch(async () => {
-      await showToast(ToastStyle.Failure, 'Could not fetch devices.');
-    });
-
-    if (nodesData) {
-      setNodes(nodesData);
-      setIsCached(false);
-      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
-    }
-  }
-
-  useEffect(() => {
-    loadCache();
-  }, []);
-
-  useEffect(() => {
-    fetchNodes();
-  }, [count]);
 
   const tintColor = (node: Node) => {
     if (isCached) return Color.PrimaryText;
@@ -62,48 +37,39 @@ export default function devices() {
   };
 
   return (
-    <List isLoading={!nodes.length || isCached}>
-      {nodes.map((node) => (
-        <List.Item
-          key={node.id}
-          title={node.name}
-          icon={{
-            source: Icon.Circle,
-            tintColor: tintColor(node),
-          }}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Toggle"
-                shortcut={{ modifiers: [], key: 'enter' }}
-                onAction={async () => {
-                  putAttribute(onOffAttribute(node)?.id!, toggleValue(node));
-                  await waitFor(controlDelay);
-                  updateData();
-                }}
-              />
-              <ActionPanel.Item
-                title="Turn On"
-                shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-                onAction={async () => {
-                  putAttribute(onOffAttribute(node)?.id!, 1);
-                  await waitFor(controlDelay);
-                  updateData();
-                }}
-              />
-              <ActionPanel.Item
-                title="Turn Off"
-                shortcut={{ modifiers: ['cmd'], key: 'delete' }}
-                onAction={async () => {
-                  putAttribute(onOffAttribute(node)?.id!, 0);
-                  await waitFor(controlDelay);
-                  updateData();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={isLoading}>
+      {(isCached || isSuccess) &&
+        nodes.map((node) => (
+          <List.Item
+            key={node.id}
+            title={node.name}
+            icon={{
+              source: Icon.Circle,
+              tintColor: tintColor(node),
+            }}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Toggle"
+                  shortcut={{ modifiers: [], key: 'enter' }}
+                  onAction={() =>
+                    control(onOffAttribute(node)?.id!, toggleValue(node))
+                  }
+                />
+                <ActionPanel.Item
+                  title="Turn On"
+                  shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+                  onAction={() => control(onOffAttribute(node)?.id!, 1)}
+                />
+                <ActionPanel.Item
+                  title="Turn Off"
+                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  onAction={() => control(onOffAttribute(node)?.id!, 0)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }

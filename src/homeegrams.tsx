@@ -1,62 +1,39 @@
-import {
-  ActionPanel,
-  getLocalStorageItem,
-  Icon,
-  List,
-  setLocalStorageItem,
-  showToast,
-  ToastStyle,
-} from '@raycast/api';
-import { useEffect, useState } from 'react';
-import { getHomeegrams, Homeegram, playHomeegram } from './lib/homee';
+import { ActionPanel, Icon, List, showToast, ToastStyle } from '@raycast/api';
+import { useHomeegrams } from './hooks/useHomeegrams';
 
 export default function homeegrams() {
-  const [homeegrams, setHomeegrams] = useState<Homeegram[]>([]);
-  const [isCached, setIsCached] = useState(true);
+  const {
+    isLoading,
+    isCached,
+    isSuccess,
+    isError,
+    data: homeegrams,
+    play,
+  } = useHomeegrams();
 
-  async function loadCache() {
-    const cachedHomeegrams: string | undefined = await getLocalStorageItem(
-      'homeegrams'
-    );
-    if (cachedHomeegrams && !homeegrams.length) {
-      setHomeegrams(JSON.parse(cachedHomeegrams));
-    }
+  if (isError) {
+    showToast(ToastStyle.Failure, 'Could not fetch homeegrams.');
   }
-
-  async function fetchHomeegrams() {
-    const homeegramsData = await getHomeegrams().catch(async () => {
-      await showToast(ToastStyle.Failure, 'Could not fetch homeegrams.');
-    });
-
-    if (homeegramsData) {
-      setHomeegrams(homeegramsData);
-      setIsCached(false);
-      await setLocalStorageItem('homeegrams', JSON.stringify(homeegramsData));
-    }
-  }
-  useEffect(() => {
-    loadCache();
-    fetchHomeegrams();
-  }, []);
 
   return (
-    <List isLoading={!homeegrams.length || isCached}>
-      {homeegrams.map((homeegram) => (
-        <List.Item
-          key={homeegram.id}
-          title={homeegram.name}
-          icon={Icon.ArrowRight}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Item
-                title="Play"
-                shortcut={{ modifiers: [], key: 'enter' }}
-                onAction={() => playHomeegram(homeegram.id)}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={isLoading}>
+      {(isCached || isSuccess) &&
+        homeegrams.map((homeegram) => (
+          <List.Item
+            key={homeegram.id}
+            title={homeegram.name}
+            icon={Icon.ArrowRight}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Item
+                  title="Play"
+                  shortcut={{ modifiers: [], key: 'enter' }}
+                  onAction={() => play(homeegram.id)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
     </List>
   );
 }
