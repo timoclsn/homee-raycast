@@ -12,8 +12,10 @@ import { waitFor } from './lib/utils';
 import { useGroups } from './hooks/useGroups';
 import { useNodes } from './hooks/useNodes';
 import { useRelationships } from './hooks/useRelationships';
+import { useState } from 'react';
 
 export default function groups() {
+  const [lastControlled, setLastControlled] = useState<number>();
   const {
     isLoading: groupsIsLoading,
     isCached: groupsIsCached,
@@ -64,15 +66,22 @@ export default function groups() {
     showToast(ToastStyle.Failure, 'Could not fetch groups.');
   }
 
+  const subtitle = (group: Group) => {
+    if (isCached()) return '-';
+    if (isLoading() && lastControlled === group.id) return 'Refreshing…';
+    if (groupIsOn(group, relationships, nodes)) return 'On';
+    return 'Off';
+  };
+
   const tintColor = (group: Group) => {
     if (isCached()) return Color.PrimaryText;
-    if (isGroupOn(group, relationships, nodes)) return Color.Yellow;
+    if (groupIsOn(group, relationships, nodes)) return Color.Yellow;
     return Color.PrimaryText;
   };
 
   const toggleValue = (group: Group) => {
     if (isCached()) return 1;
-    if (isGroupOn(group, relationships, nodes)) return 0;
+    if (groupIsOn(group, relationships, nodes)) return 0;
     return 1;
   };
 
@@ -83,6 +92,7 @@ export default function groups() {
           <List.Item
             key={group.id}
             title={group.name}
+            subtitle={subtitle(group)}
             icon={{
               source: Icon.Circle,
               tintColor: tintColor(group),
@@ -98,6 +108,7 @@ export default function groups() {
                       AttributeType.OnOff,
                       toggleValue(group)
                     );
+                    setLastControlled(group.id);
                     await waitFor(controlDelay);
                     nodesRefetch();
                   }}
@@ -107,6 +118,7 @@ export default function groups() {
                   shortcut={{ modifiers: ['cmd'], key: 'enter' }}
                   onAction={async () => {
                     groupsControl(group.id, AttributeType.OnOff, 1);
+                    setLastControlled(group.id);
                     await waitFor(controlDelay);
                     nodesRefetch();
                   }}
@@ -116,6 +128,7 @@ export default function groups() {
                   shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                   onAction={async () => {
                     groupsControl(group.id, AttributeType.OnOff, 0);
+                    setLastControlled(group.id);
                     await waitFor(controlDelay);
                     nodesRefetch();
                   }}
@@ -140,7 +153,7 @@ function getGroupNodes(
   );
 }
 
-function isGroupOn(group: Group, relationships: Relationship[], nodes: Node[]) {
+function groupIsOn(group: Group, relationships: Relationship[], nodes: Node[]) {
   const groupNodes = getGroupNodes(group, relationships, nodes);
 
   const onOffNodes = groupNodes.filter((node) =>
