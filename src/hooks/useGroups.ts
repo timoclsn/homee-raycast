@@ -1,14 +1,53 @@
 import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
 import { useState, useEffect } from 'react';
 import { AttributeType } from '../lib/enums';
-import { Group, getGroups, putGroup } from '../lib/homee';
+import { Group, getGroups, putGroup, controlDelay } from '../lib/homee';
+import { waitFor } from '../lib/utils';
+import { useNodes } from './useNodes';
+import { useRelationships } from './useRelationships';
 
 export function useGroups() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCached, setIsCached] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
+  const [groupsIsLoading, setGrpupsIsLoading] = useState(true);
+  const [groupsIsCached, setGroupsIsCached] = useState(false);
+  const [groupsIsSuccess, setGroupsIsSuccess] = useState(false);
+  const [groupsIsError, setGroupsIsError] = useState(false);
   const [data, setData] = useState<Group[]>([]);
+  const [lastControlled, setLastControlled] = useState<number>();
+
+  const {
+    isLoading: nodesIsLoading,
+    isCached: nodesIsCached,
+    isSuccess: nodesIsSuccess,
+    isError: nodesIsError,
+    data: nodes,
+    refetch: nodesRefetch,
+  } = useNodes();
+
+  const {
+    isLoading: relationshipsIsLoading,
+    isCached: relationshipsIsCached,
+    isSuccess: relationshipsIsSuccess,
+    isError: relationshipsIsError,
+    data: relationships,
+  } = useRelationships();
+
+  const isCached = () =>
+    [groupsIsCached, nodesIsCached, relationshipsIsCached].some(
+      (value) => value
+    );
+
+  const isLoading = () =>
+    [groupsIsLoading, nodesIsLoading, relationshipsIsLoading].some(
+      (value) => value
+    );
+
+  const isError = () =>
+    [groupsIsError, nodesIsError, relationshipsIsError].some((value) => value);
+
+  const isSuccess = () =>
+    [groupsIsSuccess, nodesIsSuccess, relationshipsIsSuccess].every(
+      (value) => value
+    );
 
   async function loadCache() {
     const cachedGroups: string | undefined = await getLocalStorageItem(
@@ -16,24 +55,24 @@ export function useGroups() {
     );
     if (cachedGroups && !data.length) {
       setData(JSON.parse(cachedGroups));
-      setIsCached(true);
+      setGroupsIsCached(true);
     }
   }
 
   async function fetchGroups() {
-    setIsLoading(true);
-    setIsError(false);
+    setGrpupsIsLoading(true);
+    setGroupsIsError(false);
 
     const groupsData = await getGroups().catch(() => {
-      setIsError(true);
-      setIsLoading(false);
+      setGroupsIsError(true);
+      setGrpupsIsLoading(false);
     });
 
     if (groupsData) {
       setData(groupsData);
-      setIsLoading(false);
-      setIsSuccess(true);
-      setIsCached(false);
+      setGrpupsIsLoading(false);
+      setGroupsIsSuccess(true);
+      setGroupsIsCached(false);
       await setLocalStorageItem('groups', JSON.stringify(groupsData));
     }
   }
@@ -43,20 +82,52 @@ export function useGroups() {
     fetchGroups();
   }, []);
 
-  function control(
+  async function control(
     groupId: number,
     attributeType: AttributeType,
     value: number
   ) {
     putGroup(groupId, attributeType, value);
+    setLastControlled(groupId);
+    await waitFor(controlDelay);
+    nodesRefetch();
+  }
+
+  function getGroupNodes(group: Group) {
+    return relationships.flatMap((relationship) =>
+      relationship.group_id === group.id
+        ? nodes.find((node) => node.id === relationship.node_id) || []
+        : []
+    );
+  }
+
+  function groupIsOn(group: Group) {
+    const groupNodes = getGroupNodes(group);
+
+    const onOffNodes = groupNodes.filter((node) =>
+      node.attributes.find(
+        (attribute) => attribute.type === AttributeType.OnOff
+      )
+    );
+
+    if (onOffNodes.length === 0) return false;
+
+    return onOffNodes.every(
+      (node) =>
+        node.attributes.find(
+          (attribute) => attribute.type === AttributeType.OnOff
+        )?.target_value === 1
+    );
   }
 
   return {
-    isLoading,
-    isCached,
-    isSuccess,
-    isError,
+    isLoading: isLoading(),
+    isCached: isCached(),
+    isSuccess: isSuccess(),
+    isError: isError(),
     data,
+    lastControlled,
     control,
+    groupIsOn,
   } as const;
 }

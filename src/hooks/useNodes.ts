@@ -1,5 +1,6 @@
 import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
 import { useEffect, useState } from 'react';
+import { AttributeType } from '../lib/enums';
 import { controlDelay, getNodes, putAttribute } from '../lib/homee';
 import { Node } from '../lib/homee';
 import { waitFor } from '../lib/utils';
@@ -11,6 +12,7 @@ export function useNodes() {
   const [isError, setIsError] = useState(false);
   const [data, setData] = useState<Node[]>([]);
   const [count, setCount] = useState(0);
+  const [lastControlled, setLastControlled] = useState<number>();
 
   function refetch() {
     setCount((prev) => prev + 1);
@@ -50,11 +52,17 @@ export function useNodes() {
     fetchNodes();
   }, [count]);
 
-  async function control(attributeID: number, value: number) {
+  async function control(nodeID: number, attributeID: number, value: number) {
     putAttribute(attributeID, value);
+    setLastControlled(nodeID);
     await waitFor(controlDelay);
     refetch();
   }
+
+  const onOffAttribute = (node: Node) =>
+    node.attributes.find((attr) => attr.type === AttributeType.OnOff);
+
+  const nodeIsOn = (node: Node) => onOffAttribute(node)?.target_value === 1;
 
   return {
     isLoading,
@@ -62,7 +70,10 @@ export function useNodes() {
     isSuccess,
     isError,
     data,
+    lastControlled,
     control,
     refetch,
+    nodeIsOn,
+    onOffAttribute,
   } as const;
 }

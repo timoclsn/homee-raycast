@@ -6,20 +6,20 @@ import {
   showToast,
   ToastStyle,
 } from '@raycast/api';
-import { AttributeType } from './lib/enums';
 import { Node } from './lib/homee';
 import { useNodes } from './hooks/useNodes';
-import { useState } from 'react';
 
 export default function devices() {
-  const [lastControlled, setLastControlled] = useState<number>();
   const {
     data: nodes,
     isLoading,
     isCached,
     isSuccess,
     isError,
+    lastControlled,
     control,
+    onOffAttribute,
+    nodeIsOn,
   } = useNodes();
 
   if (isError) {
@@ -62,26 +62,27 @@ export default function devices() {
                 <ActionPanel.Item
                   title="Toggle"
                   shortcut={{ modifiers: [], key: 'enter' }}
-                  onAction={() => {
-                    setLastControlled(node.id);
-                    control(onOffAttribute(node)?.id!, toggleValue(node));
-                  }}
+                  onAction={() =>
+                    control(
+                      node.id,
+                      onOffAttribute(node)?.id!,
+                      toggleValue(node)
+                    )
+                  }
                 />
                 <ActionPanel.Item
                   title="Turn On"
                   shortcut={{ modifiers: ['cmd'], key: 'enter' }}
-                  onAction={() => {
-                    setLastControlled(node.id);
-                    control(onOffAttribute(node)?.id!, 1);
-                  }}
+                  onAction={() =>
+                    control(node.id, onOffAttribute(node)?.id!, 1)
+                  }
                 />
                 <ActionPanel.Item
                   title="Turn Off"
                   shortcut={{ modifiers: ['cmd'], key: 'delete' }}
-                  onAction={() => {
-                    setLastControlled(node.id);
-                    control(onOffAttribute(node)?.id!, 0);
-                  }}
+                  onAction={() =>
+                    control(node.id, onOffAttribute(node)?.id!, 0)
+                  }
                 />
               </ActionPanel>
             }
@@ -90,8 +91,3 @@ export default function devices() {
     </List>
   );
 }
-
-const onOffAttribute = (node: Node) =>
-  node.attributes.find((attr) => attr.type === AttributeType.OnOff);
-
-const nodeIsOn = (node: Node) => onOffAttribute(node)?.target_value === 1;
