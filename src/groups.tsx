@@ -3,6 +3,7 @@ import {
   Color,
   Icon,
   List,
+  OpenAction,
   showToast,
   ToastStyle,
 } from '@raycast/api';
@@ -75,6 +76,13 @@ export default function groups() {
                   title="Turn Off"
                   shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                   onAction={() => control(group.id, AttributeType.OnOff, 0)}
+                />
+                <OpenAction
+                  title="Open homee"
+                  target=""
+                  application="homee"
+                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                  icon=""
                 />
               </ActionPanel>
             }

@@ -3,6 +3,7 @@ import {
   Color,
   Icon,
   List,
+  OpenAction,
   showToast,
   ToastStyle,
 } from '@raycast/api';
@@ -83,6 +84,13 @@ export default function devices() {
                   onAction={() =>
                     control(node.id, onOffAttribute(node)?.id!, 0)
                   }
+                />
+                <OpenAction
+                  title="Open homee"
+                  target=""
+                  application="homee"
+                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                  icon=""
                 />
               </ActionPanel>
             }

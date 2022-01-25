@@ -1,4 +1,11 @@
-import { ActionPanel, Icon, List, showToast, ToastStyle } from '@raycast/api';
+import {
+  ActionPanel,
+  Icon,
+  List,
+  OpenAction,
+  showToast,
+  ToastStyle,
+} from '@raycast/api';
 import { useHomeegrams } from './hooks/useHomeegrams';
 
 export default function homeegrams() {
@@ -29,6 +36,13 @@ export default function homeegrams() {
                   title="Play"
                   shortcut={{ modifiers: [], key: 'enter' }}
                   onAction={() => play(homeegram.id)}
+                />
+                <OpenAction
+                  title="Open homee"
+                  target=""
+                  application="homee"
+                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                  icon=""
                 />
               </ActionPanel>
             }
