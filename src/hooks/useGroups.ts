@@ -50,11 +50,9 @@ export function useGroups() {
     );
 
   async function loadCache() {
-    const cachedGroups: string | undefined = await getLocalStorageItem(
-      'groups'
-    );
+    const cachedGroups = await getLocalStorageItem('groups');
     if (cachedGroups && !data.length) {
-      setData(JSON.parse(cachedGroups));
+      setData(JSON.parse(cachedGroups.toString()));
       setGroupsIsCached(true);
     }
   }

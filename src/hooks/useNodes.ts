@@ -19,9 +19,9 @@ export function useNodes() {
   }
 
   async function loadCache() {
-    const cachedNodes: string | undefined = await getLocalStorageItem('nodes');
+    const cachedNodes = await getLocalStorageItem('nodes');
     if (cachedNodes && !data.length) {
-      setData(JSON.parse(cachedNodes));
+      setData(JSON.parse(cachedNodes.toString()));
       setIsCached(true);
     }
   }

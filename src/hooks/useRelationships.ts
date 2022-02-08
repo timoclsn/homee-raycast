@@ -10,11 +10,9 @@ export function useRelationships() {
   const [data, setData] = useState<Relationship[]>([]);
 
   async function loadCache() {
-    const cachedRelationships: string | undefined = await getLocalStorageItem(
-      'relationships'
-    );
+    const cachedRelationships = await getLocalStorageItem('relationships');
     if (cachedRelationships && !data.length) {
-      setData(JSON.parse(cachedRelationships));
+      setData(JSON.parse(cachedRelationships.toString()));
       setIsCached(true);
     }
   }

@@ -10,11 +10,9 @@ export function useHomeegrams() {
   const [data, setData] = useState<Homeegram[]>([]);
 
   async function loadCache() {
-    const cachedHomeegrams: string | undefined = await getLocalStorageItem(
-      'homeegrams'
-    );
+    const cachedHomeegrams = await getLocalStorageItem('homeegrams');
     if (cachedHomeegrams && !data.length) {
-      setData(JSON.parse(cachedHomeegrams));
+      setData(JSON.parse(cachedHomeegrams.toString()));
       setIsCached(true);
     }
   }
