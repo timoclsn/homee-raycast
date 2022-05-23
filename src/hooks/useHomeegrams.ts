@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
+import { LocalStorage } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getHomeegrams, Homeegram, playHomeegram } from '../lib/homee';
 
@@ -10,7 +10,7 @@ export function useHomeegrams() {
   const [data, setData] = useState<Homeegram[]>([]);
 
   async function loadCache() {
-    const cachedHomeegrams = await getLocalStorageItem('homeegrams');
+    const cachedHomeegrams = await LocalStorage.getItem('homeegrams');
     if (cachedHomeegrams && !data.length) {
       setData(JSON.parse(cachedHomeegrams.toString()));
       setIsCached(true);
@@ -31,7 +31,7 @@ export function useHomeegrams() {
       setIsLoading(false);
       setIsSuccess(true);
       setIsCached(false);
-      await setLocalStorageItem('homeegrams', JSON.stringify(homeegramsData));
+      await LocalStorage.setItem('homeegrams', JSON.stringify(homeegramsData));
     }
   }
   useEffect(() => {

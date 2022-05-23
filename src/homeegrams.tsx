@@ -2,9 +2,9 @@ import {
   ActionPanel,
   Icon,
   List,
-  OpenAction,
+  Action,
   showToast,
-  ToastStyle,
+  Toast,
 } from '@raycast/api';
 import { useHomeegrams } from './hooks/useHomeegrams';
 
@@ -19,7 +19,7 @@ export default function homeegrams() {
   } = useHomeegrams();
 
   if (isError) {
-    showToast(ToastStyle.Failure, 'Could not fetch homeegrams.');
+    showToast(Toast.Style.Failure, 'Could not fetch homeegrams.');
   }
 
   return (
@@ -32,12 +32,12 @@ export default function homeegrams() {
             icon={Icon.ArrowRight}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action
                   title="Play"
                   shortcut={{ modifiers: [], key: 'enter' }}
                   onAction={() => play(homeegram.id)}
                 />
-                <OpenAction
+                <Action.Open
                   title="Open homee"
                   target=""
                   application="homee"

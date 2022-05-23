@@ -3,9 +3,9 @@ import {
   Color,
   Icon,
   List,
-  OpenAction,
+  Action,
   showToast,
-  ToastStyle,
+  Toast,
 } from '@raycast/api';
 import { AttributeType } from './lib/enums';
 import { Group } from './lib/homee';
@@ -24,7 +24,7 @@ export default function groups() {
   } = useGroups();
 
   if (isError) {
-    showToast(ToastStyle.Failure, 'Could not fetch groups.');
+    showToast(Toast.Style.Failure, 'Could not fetch groups.');
   }
 
   const subtitle = (group: Group) => {
@@ -60,24 +60,24 @@ export default function groups() {
             }}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action
                   title="Toggle"
                   shortcut={{ modifiers: [], key: 'enter' }}
                   onAction={() =>
                     control(group.id, AttributeType.OnOff, toggleValue(group))
                   }
                 />
-                <ActionPanel.Item
+                <Action
                   title="Turn On"
                   shortcut={{ modifiers: ['cmd'], key: 'enter' }}
                   onAction={() => control(group.id, AttributeType.OnOff, 1)}
                 />
-                <ActionPanel.Item
+                <Action
                   title="Turn Off"
                   shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                   onAction={() => control(group.id, AttributeType.OnOff, 0)}
                 />
-                <OpenAction
+                <Action.Open
                   title="Open homee"
                   target=""
                   application="homee"

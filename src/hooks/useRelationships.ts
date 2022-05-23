@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
+import { LocalStorage } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getRelationships, Relationship } from '../lib/homee';
 
@@ -10,7 +10,7 @@ export function useRelationships() {
   const [data, setData] = useState<Relationship[]>([]);
 
   async function loadCache() {
-    const cachedRelationships = await getLocalStorageItem('relationships');
+    const cachedRelationships = await LocalStorage.getItem('relationships');
     if (cachedRelationships && !data.length) {
       setData(JSON.parse(cachedRelationships.toString()));
       setIsCached(true);
@@ -31,7 +31,7 @@ export function useRelationships() {
       setIsLoading(false);
       setIsSuccess(true);
       setIsCached(false);
-      await setLocalStorageItem(
+      await LocalStorage.setItem(
         'relationships',
         JSON.stringify(relationshipsData)
       );

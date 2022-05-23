@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
+import { LocalStorage } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { AttributeType } from '../lib/enums';
 import { controlDelay, getNodes, putAttribute } from '../lib/homee';
@@ -19,7 +19,7 @@ export function useNodes() {
   }
 
   async function loadCache() {
-    const cachedNodes = await getLocalStorageItem('nodes');
+    const cachedNodes = await LocalStorage.getItem('nodes');
     if (cachedNodes && !data.length) {
       setData(JSON.parse(cachedNodes.toString()));
       setIsCached(true);
@@ -40,7 +40,7 @@ export function useNodes() {
       setIsLoading(false);
       setIsSuccess(true);
       setIsCached(false);
-      await setLocalStorageItem('nodes', JSON.stringify(nodesData));
+      await LocalStorage.setItem('nodes', JSON.stringify(nodesData));
     }
   }
 

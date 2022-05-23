@@ -1,4 +1,4 @@
-import { getLocalStorageItem, setLocalStorageItem } from '@raycast/api';
+import { LocalStorage } from '@raycast/api';
 import { useState, useEffect } from 'react';
 import { AttributeType } from '../lib/enums';
 import { Group, getGroups, putGroup, controlDelay } from '../lib/homee';
@@ -50,7 +50,7 @@ export function useGroups() {
     );
 
   async function loadCache() {
-    const cachedGroups = await getLocalStorageItem('groups');
+    const cachedGroups = await LocalStorage.getItem('groups');
     if (cachedGroups && !data.length) {
       setData(JSON.parse(cachedGroups.toString()));
       setGroupsIsCached(true);
@@ -71,7 +71,7 @@ export function useGroups() {
       setGrpupsIsLoading(false);
       setGroupsIsSuccess(true);
       setGroupsIsCached(false);
-      await setLocalStorageItem('groups', JSON.stringify(groupsData));
+      await LocalStorage.setItem('groups', JSON.stringify(groupsData));
     }
   }
 

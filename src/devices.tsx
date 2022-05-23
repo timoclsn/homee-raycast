@@ -3,9 +3,9 @@ import {
   Color,
   Icon,
   List,
-  OpenAction,
+  Action,
   showToast,
-  ToastStyle,
+  Toast,
 } from '@raycast/api';
 import { Node } from './lib/homee';
 import { useNodes } from './hooks/useNodes';
@@ -24,7 +24,7 @@ export default function devices() {
   } = useNodes();
 
   if (isError) {
-    showToast(ToastStyle.Failure, 'Could not fetch devices.');
+    showToast(Toast.Style.Failure, 'Could not fetch devices.');
   }
 
   const subtitle = (node: Node) => {
@@ -60,7 +60,7 @@ export default function devices() {
             }}
             actions={
               <ActionPanel>
-                <ActionPanel.Item
+                <Action
                   title="Toggle"
                   shortcut={{ modifiers: [], key: 'enter' }}
                   onAction={() =>
@@ -71,21 +71,21 @@ export default function devices() {
                     )
                   }
                 />
-                <ActionPanel.Item
+                <Action
                   title="Turn On"
                   shortcut={{ modifiers: ['cmd'], key: 'enter' }}
                   onAction={() =>
                     control(node.id, onOffAttribute(node)?.id!, 1)
                   }
                 />
-                <ActionPanel.Item
+                <Action
                   title="Turn Off"
                   shortcut={{ modifiers: ['cmd'], key: 'delete' }}
                   onAction={() =>
                     control(node.id, onOffAttribute(node)?.id!, 0)
                   }
                 />
-                <OpenAction
+                <Action.Open
                   title="Open homee"
                   target=""
                   application="homee"
