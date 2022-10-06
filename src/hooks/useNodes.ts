@@ -1,60 +1,120 @@
 import { LocalStorage } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { AttributeType } from '../lib/enums';
-import { controlDelay, getNodes, putAttribute } from '../lib/homee';
-import { Node } from '../lib/homee';
+import { controlDelay, getNodes, Node, putAttribute } from '../lib/homee';
 import { waitFor } from '../lib/utils';
 
+interface State {
+  isLoading: boolean;
+  isCached: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  data: Array<Node>;
+  lastControlled: number;
+}
+
+const initalState: State = {
+  isLoading: true,
+  isCached: false,
+  isSuccess: false,
+  isError: false,
+  data: [],
+  lastControlled: 0,
+};
+
+type ActionType =
+  | { type: 'loadedCache'; payload: Array<Node> }
+  | { type: 'fetchNodes' }
+  | { type: 'fetchNodesSuccess'; payload: Array<Node> }
+  | { type: 'fetchNodesError' }
+  | { type: 'control'; payload: number };
+
+const reducer = (state: State, action: ActionType): State => {
+  switch (action.type) {
+    case 'loadedCache':
+      return {
+        ...state,
+        data: action.payload,
+        isCached: true,
+      };
+    case 'fetchNodes':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case 'fetchNodesSuccess':
+      return {
+        ...state,
+        data: action.payload,
+        isLoading: false,
+        isSuccess: true,
+        isCached: false,
+      };
+    case 'fetchNodesError':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    case 'control':
+      return {
+        ...state,
+        lastControlled: action.payload,
+      };
+    default:
+      throw new Error('Unknown action type');
+  }
+};
+
 export function useNodes() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCached, setIsCached] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [data, setData] = useState<Node[]>([]);
-  const [count, setCount] = useState(0);
-  const [lastControlled, setLastControlled] = useState<number>();
+  const [state, dispatch] = useReducer(reducer, initalState);
+  const { isLoading, isCached, isSuccess, isError, data, lastControlled } =
+    state;
+
+  useEffect(() => {
+    loadCache();
+    fetchNodes();
+  }, []);
 
   function refetch() {
-    setCount((prev) => prev + 1);
+    fetchNodes();
   }
 
   async function loadCache() {
     const cachedNodes = await LocalStorage.getItem('nodes');
     if (cachedNodes && !data.length) {
-      setData(JSON.parse(cachedNodes.toString()));
-      setIsCached(true);
+      dispatch({
+        type: 'loadedCache',
+        payload: JSON.parse(cachedNodes.toString()),
+      });
     }
   }
 
   async function fetchNodes() {
-    setIsLoading(true);
-    setIsError(false);
+    dispatch({
+      type: 'fetchNodes',
+    });
 
     const nodesData = await getNodes().catch(() => {
-      setIsError(true);
-      setIsLoading(false);
+      dispatch({ type: 'fetchNodesError' });
     });
 
     if (nodesData) {
-      setData(nodesData);
-      setIsLoading(false);
-      setIsSuccess(true);
-      setIsCached(false);
+      dispatch({
+        type: 'fetchNodesSuccess',
+        payload: nodesData,
+      });
       await LocalStorage.setItem('nodes', JSON.stringify(nodesData));
     }
   }
 
-  useEffect(() => {
-    loadCache();
-  }, []);
-
-  useEffect(() => {
-    fetchNodes();
-  }, [count]);
-
   async function control(nodeID: number, attributeID: number, value: number) {
     putAttribute(attributeID, value);
-    setLastControlled(nodeID);
+    dispatch({
+      type: 'control',
+      payload: nodeID,
+    });
     await waitFor(controlDelay);
     refetch();
   }
