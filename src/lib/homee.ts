@@ -1,3 +1,5 @@
+import { getPreferenceValues } from '@raycast/api';
+import fetch from 'node-fetch';
 import WebSocket from 'ws';
 import {
   AttributeBasedOn,
@@ -10,11 +12,13 @@ import {
   NodeProtocol,
   NodeState,
 } from './enums';
-import { preferences } from '@raycast/api';
-import fetch from 'node-fetch';
 
-const homeeID = preferences.homeeId?.value as string;
-const accessToken = preferences.accessToken?.value as string;
+interface Preferences {
+  homeeId: string;
+  accessToken: string;
+}
+
+const { homeeId, accessToken } = getPreferenceValues<Preferences>();
 
 export interface Node {
   id: number;
@@ -98,7 +102,7 @@ export function getNodes() {
   return new Promise<Node[]>((resolve, reject) => {
     let nodes: Node[] = [];
     const ws = new WebSocket(
-      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      `wss://${homeeId}.hom.ee/connection?access_token=${accessToken}`,
       'v2'
     );
 
@@ -136,7 +140,7 @@ export function getNodes() {
 
 export async function putAttribute(attributeID: number, targetValue: number) {
   return await fetch(
-    `https://${homeeID}.hom.ee/api/v2/nodes/0/attributes?ids=${attributeID}&target_value=${targetValue}`,
+    `https://${homeeId}.hom.ee/api/v2/nodes/0/attributes?ids=${attributeID}&target_value=${targetValue}`,
     {
       method: 'PUT',
       headers: {
@@ -150,7 +154,7 @@ export function getGroups() {
   return new Promise<Group[]>((resolve, reject) => {
     let groups: Group[] = [];
     const ws = new WebSocket(
-      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      `wss://${homeeId}.hom.ee/connection?access_token=${accessToken}`,
       'v2'
     );
 
@@ -188,7 +192,7 @@ export async function putGroup(
   targetValue: number
 ) {
   return await fetch(
-    `https://${homeeID}.hom.ee/api/v2/groups/${groupID}?attribute_type=${attributeType}&value=${targetValue}`,
+    `https://${homeeId}.hom.ee/api/v2/groups/${groupID}?attribute_type=${attributeType}&value=${targetValue}`,
     {
       method: 'PUT',
       headers: {
@@ -202,7 +206,7 @@ export function getHomeegrams() {
   return new Promise<Homeegram[]>((resolve, reject) => {
     let homeegrams: Homeegram[] = [];
     const ws = new WebSocket(
-      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      `wss://${homeeId}.hom.ee/connection?access_token=${accessToken}`,
       'v2'
     );
 
@@ -240,7 +244,7 @@ export function getHomeegrams() {
 
 export async function playHomeegram(homeegramID: number) {
   return await fetch(
-    `https://${homeeID}.hom.ee/api/v2/homeegrams/${homeegramID}?play=1`,
+    `https://${homeeId}.hom.ee/api/v2/homeegrams/${homeegramID}?play=1`,
     {
       method: 'PUT',
       headers: {
@@ -254,7 +258,7 @@ export function getRelationships() {
   return new Promise<Relationship[]>((resolve, reject) => {
     let relationships: Relationship[] = [];
     const ws = new WebSocket(
-      `wss://${homeeID}.hom.ee/connection?access_token=${accessToken}`,
+      `wss://${homeeId}.hom.ee/connection?access_token=${accessToken}`,
       'v2'
     );
 
