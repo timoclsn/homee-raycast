@@ -1,36 +1,90 @@
 import { LocalStorage } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { getHomeegrams, Homeegram, playHomeegram } from '../lib/homee';
 
+interface State {
+  isLoading: boolean;
+  isCached: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  data: Array<Homeegram>;
+}
+
+const initalState: State = {
+  isLoading: true,
+  isCached: false,
+  isSuccess: false,
+  isError: false,
+  data: [],
+};
+
+type ActionType =
+  | { type: 'loadedCache'; payload: Array<Homeegram> }
+  | { type: 'fetchHomeegrams' }
+  | { type: 'fetchHomeegramsSuccess'; payload: Array<Homeegram> }
+  | { type: 'fetchHomeegramsError' };
+
+const reducer = (state: State, action: ActionType): State => {
+  switch (action.type) {
+    case 'loadedCache':
+      return {
+        ...state,
+        data: action.payload,
+        isCached: true,
+      };
+    case 'fetchHomeegrams':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case 'fetchHomeegramsSuccess':
+      return {
+        ...state,
+        data: action.payload,
+        isLoading: false,
+        isSuccess: true,
+        isCached: false,
+      };
+    case 'fetchHomeegramsError':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    default:
+      throw new Error('Unknown action type');
+  }
+};
+
 export function useHomeegrams() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCached, setIsCached] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [data, setData] = useState<Homeegram[]>([]);
+  const [state, dispatch] = useReducer(reducer, initalState);
+  const { isLoading, isCached, isSuccess, isError, data } = state;
 
   async function loadCache() {
     const cachedHomeegrams = await LocalStorage.getItem('homeegrams');
     if (cachedHomeegrams && !data.length) {
-      setData(JSON.parse(cachedHomeegrams.toString()));
-      setIsCached(true);
+      dispatch({
+        type: 'loadedCache',
+        payload: JSON.parse(cachedHomeegrams.toString()),
+      });
     }
   }
 
   async function fetchHomeegrams() {
-    setIsLoading(true);
-    setIsError(false);
+    dispatch({
+      type: 'fetchHomeegrams',
+    });
 
     const homeegramsData = await getHomeegrams().catch(() => {
-      setIsError(true);
-      setIsLoading(false);
+      dispatch({ type: 'fetchHomeegramsError' });
     });
 
     if (homeegramsData) {
-      setData(homeegramsData);
-      setIsLoading(false);
-      setIsSuccess(true);
-      setIsCached(false);
+      dispatch({
+        type: 'fetchHomeegramsSuccess',
+        payload: homeegramsData,
+      });
       await LocalStorage.setItem('homeegrams', JSON.stringify(homeegramsData));
     }
   }

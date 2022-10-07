@@ -1,18 +1,84 @@
 import { LocalStorage } from '@raycast/api';
-import { useState, useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import { AttributeType } from '../lib/enums';
-import { Group, getGroups, putGroup, controlDelay } from '../lib/homee';
+import { controlDelay, getGroups, Group, putGroup } from '../lib/homee';
 import { waitFor } from '../lib/utils';
 import { useNodes } from './useNodes';
 import { useRelationships } from './useRelationships';
 
+interface State {
+  groupsIsLoading: boolean;
+  groupsIsCached: boolean;
+  groupsIsSuccess: boolean;
+  groupsIsError: boolean;
+  data: Array<Group>;
+  lastControlled: number;
+}
+
+const initalState: State = {
+  groupsIsLoading: true,
+  groupsIsCached: false,
+  groupsIsSuccess: false,
+  groupsIsError: false,
+  data: [],
+  lastControlled: 0,
+};
+
+type ActionType =
+  | { type: 'loadedCache'; payload: Array<Group> }
+  | { type: 'fetchGroups' }
+  | { type: 'fetchGroupsSuccess'; payload: Array<Group> }
+  | { type: 'fetchGroupsError' }
+  | { type: 'control'; payload: number };
+
+const reducer = (state: State, action: ActionType): State => {
+  switch (action.type) {
+    case 'loadedCache':
+      return {
+        ...state,
+        data: action.payload,
+        groupsIsCached: true,
+      };
+    case 'fetchGroups':
+      return {
+        ...state,
+        groupsIsLoading: true,
+        groupsIsError: false,
+      };
+    case 'fetchGroupsSuccess':
+      return {
+        ...state,
+        data: action.payload,
+        groupsIsLoading: false,
+        groupsIsSuccess: true,
+        groupsIsCached: false,
+      };
+    case 'fetchGroupsError':
+      return {
+        ...state,
+        groupsIsLoading: false,
+        groupsIsError: true,
+      };
+    case 'control':
+      return {
+        ...state,
+        lastControlled: action.payload,
+      };
+    default:
+      throw new Error('Unknown action type');
+  }
+};
+
 export function useGroups() {
-  const [groupsIsLoading, setGrpupsIsLoading] = useState(true);
-  const [groupsIsCached, setGroupsIsCached] = useState(false);
-  const [groupsIsSuccess, setGroupsIsSuccess] = useState(false);
-  const [groupsIsError, setGroupsIsError] = useState(false);
-  const [data, setData] = useState<Group[]>([]);
-  const [lastControlled, setLastControlled] = useState<number>();
+  const [state, dispatch] = useReducer(reducer, initalState);
+  const {
+    groupsIsLoading,
+    groupsIsCached,
+    groupsIsSuccess,
+    groupsIsError,
+    data,
+    lastControlled,
+  } = state;
 
   const {
     isLoading: nodesIsLoading,
@@ -52,25 +118,27 @@ export function useGroups() {
   async function loadCache() {
     const cachedGroups = await LocalStorage.getItem('groups');
     if (cachedGroups && !data.length) {
-      setData(JSON.parse(cachedGroups.toString()));
-      setGroupsIsCached(true);
+      dispatch({
+        type: 'loadedCache',
+        payload: JSON.parse(cachedGroups.toString()),
+      });
     }
   }
 
   async function fetchGroups() {
-    setGrpupsIsLoading(true);
-    setGroupsIsError(false);
+    dispatch({
+      type: 'fetchGroups',
+    });
 
     const groupsData = await getGroups().catch(() => {
-      setGroupsIsError(true);
-      setGrpupsIsLoading(false);
+      dispatch({ type: 'fetchGroupsError' });
     });
 
     if (groupsData) {
-      setData(groupsData);
-      setGrpupsIsLoading(false);
-      setGroupsIsSuccess(true);
-      setGroupsIsCached(false);
+      dispatch({
+        type: 'fetchGroupsSuccess',
+        payload: groupsData,
+      });
       await LocalStorage.setItem('groups', JSON.stringify(groupsData));
     }
   }
@@ -86,7 +154,10 @@ export function useGroups() {
     value: number
   ) {
     putGroup(groupId, attributeType, value);
-    setLastControlled(groupId);
+    dispatch({
+      type: 'control',
+      payload: groupId,
+    });
     await waitFor(controlDelay);
     nodesRefetch();
   }

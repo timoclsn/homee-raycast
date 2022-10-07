@@ -1,36 +1,90 @@
 import { LocalStorage } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { getRelationships, Relationship } from '../lib/homee';
 
+interface State {
+  isLoading: boolean;
+  isCached: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  data: Array<Relationship>;
+}
+
+const initalState: State = {
+  isLoading: true,
+  isCached: false,
+  isSuccess: false,
+  isError: false,
+  data: [],
+};
+
+type ActionType =
+  | { type: 'loadedCache'; payload: Array<Relationship> }
+  | { type: 'fetchRelationships' }
+  | { type: 'fetchRelationshipsSuccess'; payload: Array<Relationship> }
+  | { type: 'fetchRelationshipsError' };
+
+const reducer = (state: State, action: ActionType): State => {
+  switch (action.type) {
+    case 'loadedCache':
+      return {
+        ...state,
+        data: action.payload,
+        isCached: true,
+      };
+    case 'fetchRelationships':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case 'fetchRelationshipsSuccess':
+      return {
+        ...state,
+        data: action.payload,
+        isLoading: false,
+        isSuccess: true,
+        isCached: false,
+      };
+    case 'fetchRelationshipsError':
+      return {
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
+    default:
+      throw new Error('Unknown action type');
+  }
+};
+
 export function useRelationships() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCached, setIsCached] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [data, setData] = useState<Relationship[]>([]);
+  const [state, dispatch] = useReducer(reducer, initalState);
+  const { isLoading, isCached, isSuccess, isError, data } = state;
 
   async function loadCache() {
     const cachedRelationships = await LocalStorage.getItem('relationships');
     if (cachedRelationships && !data.length) {
-      setData(JSON.parse(cachedRelationships.toString()));
-      setIsCached(true);
+      dispatch({
+        type: 'loadedCache',
+        payload: JSON.parse(cachedRelationships.toString()),
+      });
     }
   }
 
   async function fetchRelationships() {
-    setIsLoading(true);
-    setIsError(false);
+    dispatch({
+      type: 'fetchRelationships',
+    });
 
     const relationshipsData = await getRelationships().catch(() => {
-      setIsError(true);
-      setIsLoading(false);
+      dispatch({ type: 'fetchRelationshipsError' });
     });
 
     if (relationshipsData) {
-      setData(relationshipsData);
-      setIsLoading(false);
-      setIsSuccess(true);
-      setIsCached(false);
+      dispatch({
+        type: 'fetchRelationshipsSuccess',
+        payload: relationshipsData,
+      });
       await LocalStorage.setItem(
         'relationships',
         JSON.stringify(relationshipsData)
