@@ -34,14 +34,14 @@ export default function homeegrams() {
               <ActionPanel>
                 <Action
                   title="Play"
-                  shortcut={{ modifiers: [], key: 'enter' }}
+                  shortcut={{ modifiers: [], key: 'space' }}
                   onAction={() => play(homeegram.id)}
                 />
                 <Action.Open
                   title="Open homee"
                   target=""
                   application="homee"
-                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'o' }}
                   icon=""
                 />
               </ActionPanel>

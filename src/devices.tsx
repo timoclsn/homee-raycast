@@ -62,25 +62,25 @@ export default function devices() {
               <ActionPanel>
                 <Action
                   title="Toggle"
-                  shortcut={{ modifiers: [], key: 'enter' }}
+                  shortcut={{ modifiers: [], key: 'space' }}
                   onAction={() =>
                     control(
                       node.id,
                       onOffAttribute(node)?.id!,
-                      toggleValue(node)
+                      toggleValue(node),
                     )
                   }
                 />
                 <Action
                   title="Turn On"
-                  shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'enter' }}
                   onAction={() =>
                     control(node.id, onOffAttribute(node)?.id!, 1)
                   }
                 />
                 <Action
                   title="Turn Off"
-                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'delete' }}
                   onAction={() =>
                     control(node.id, onOffAttribute(node)?.id!, 0)
                   }
@@ -89,7 +89,7 @@ export default function devices() {
                   title="Open homee"
                   target=""
                   application="homee"
-                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'o' }}
                   icon=""
                 />
               </ActionPanel>

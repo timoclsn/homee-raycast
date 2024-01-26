@@ -62,26 +62,26 @@ export default function groups() {
               <ActionPanel>
                 <Action
                   title="Toggle"
-                  shortcut={{ modifiers: [], key: 'enter' }}
+                  shortcut={{ modifiers: [], key: 'space' }}
                   onAction={() =>
                     control(group.id, AttributeType.OnOff, toggleValue(group))
                   }
                 />
                 <Action
                   title="Turn On"
-                  shortcut={{ modifiers: ['cmd'], key: 'enter' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'enter' }}
                   onAction={() => control(group.id, AttributeType.OnOff, 1)}
                 />
                 <Action
                   title="Turn Off"
-                  shortcut={{ modifiers: ['cmd'], key: 'delete' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'delete' }}
                   onAction={() => control(group.id, AttributeType.OnOff, 0)}
                 />
                 <Action.Open
                   title="Open homee"
                   target=""
                   application="homee"
-                  shortcut={{ modifiers: ['cmd'], key: 'o' }}
+                  shortcut={{ modifiers: ['ctrl'], key: 'o' }}
                   icon=""
                 />
               </ActionPanel>
