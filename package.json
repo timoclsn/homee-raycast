@@ -32,6 +32,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-groups",
+      "title": "Get Groups",
+      "description": "Get all Groups."
+    },
+    {
+      "name": "control-group",
+      "title": "Control Group",
+      "description": "Control a Group."
+    }
+  ],
   "preferences": [
     {
       "name": "homeeId",
@@ -51,21 +63,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.66.0",
+    "@raycast/api": "^1.93.0",
     "node-fetch": "^3.3.2",
-    "ws": "^8.16.0"
+    "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@types/node": "~20.11.6",
-    "@types/react": "^18.2.48",
-    "@types/ws": "^8.5.10",
-    "@typescript-eslint/eslint-plugin": "^6.19.1",
-    "@typescript-eslint/parser": "^6.19.1",
-    "eslint": "^8.56.0",
-    "eslint-config-prettier": "^9.1.0",
-    "prettier": "^3.2.4",
-    "react-devtools": "^5.0.0",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~22.13.5",
+    "@types/react": "^19.0.10",
+    "@types/ws": "^8.5.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.2",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
