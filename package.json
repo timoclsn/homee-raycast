@@ -39,9 +39,14 @@
       "description": "Get all Groups."
     },
     {
-      "name": "control-group",
-      "title": "Control Group",
-      "description": "Control a Group."
+      "name": "on-off-group",
+      "title": "On Off Group",
+      "description": "Turn a Group on or off."
+    },
+    {
+      "name": "dimm-group",
+      "title": "Dimm Group",
+      "description": "Dimm a Group."
     }
   ],
   "preferences": [
@@ -82,5 +87,813 @@
     "lint": "ray lint",
     "prettier": "prettier --ignore-path .gitignore './**/*.{js,jsx,ts,tsx,css,md,json}'",
     "format": "npm run prettier -- --write"
+  },
+  "ai": {
+    "evals": [
+      {
+        "input": "@homee turn on wohnzimmer",
+        "mocks": {
+          "get-groups": [
+            {
+              "added": 1439484980,
+              "category": 0,
+              "id": 2,
+              "image": "groupicon_armchair",
+              "name": "Wohnzimmer",
+              "note": "",
+              "order": 1,
+              "owner": 0,
+              "phonetic_name": "Wohnzimmer%2C%20Wohnzimmerlicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1449390443,
+              "category": 0,
+              "id": 19,
+              "image": "groupicon_pot",
+              "name": "Küche",
+              "note": "",
+              "order": 2,
+              "owner": 0,
+              "phonetic_name": "K%C3%BCche%2C%20K%C3%BCchenlicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644438102,
+              "category": 0,
+              "id": 77,
+              "image": "groupicon_speaker_value_1",
+              "name": "Studio",
+              "note": "",
+              "order": 3,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440241462,
+              "category": 0,
+              "id": 6,
+              "image": "groupicon_bed",
+              "name": "Schlafzimmer",
+              "note": "",
+              "order": 4,
+              "owner": 0,
+              "phonetic_name": "Schlafzimmer%2C%20Schlafzimmerlicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440241472,
+              "category": 0,
+              "id": 7,
+              "image": "groupicon_bathtub",
+              "name": "Bad",
+              "note": "",
+              "order": 5,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644779263,
+              "category": 0,
+              "id": 78,
+              "image": "groupicon_flooddetector",
+              "name": "Spa",
+              "note": "",
+              "order": 6,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440241484,
+              "category": 0,
+              "id": 8,
+              "image": "groupicon_suitcase",
+              "name": "Büro",
+              "note": "",
+              "order": 7,
+              "owner": 0,
+              "phonetic_name": "B%C3%BCro%2C%20B%C3%BCrolicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1655317298,
+              "category": 0,
+              "id": 81,
+              "image": "groupicon_teddy",
+              "name": "Kinderzimmer",
+              "note": "",
+              "order": 8,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1439557230,
+              "category": 0,
+              "id": 4,
+              "image": "groupicon_presence",
+              "name": "Eingang / Flur",
+              "note": "",
+              "order": 9,
+              "owner": 0,
+              "phonetic_name": "Eingang%2C%20Eingangslicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1501091843,
+              "category": 0,
+              "id": 58,
+              "image": "groupicon_sun",
+              "name": "Balkon",
+              "note": "",
+              "order": 10,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1439626843,
+              "category": 0,
+              "id": 5,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Licht",
+              "note": "",
+              "order": 11,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440242312,
+              "category": 0,
+              "id": 9,
+              "image": "groupicon_co2",
+              "name": "Klima",
+              "note": "",
+              "order": 12,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1478629999,
+              "category": 0,
+              "id": 26,
+              "image": "groupicon_bolt",
+              "name": "Energie",
+              "note": "",
+              "order": 13,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1511697429,
+              "category": 0,
+              "id": 61,
+              "image": "groupicon_sun",
+              "name": "Wetter",
+              "note": "",
+              "order": 14,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1449390472,
+              "category": 0,
+              "id": 20,
+              "image": "groupicon_windowhandle_value_0",
+              "name": "Fenster ",
+              "note": "",
+              "order": 15,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1552022492,
+              "category": 0,
+              "id": 76,
+              "image": "groupicon_entrancedoor_value_0",
+              "name": "Türen",
+              "note": "",
+              "order": 16,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1494096332,
+              "category": 0,
+              "id": 45,
+              "image": "groupicon_twobuttonremote",
+              "name": "Schalter & Taster",
+              "note": "",
+              "order": 17,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1497983233,
+              "category": 0,
+              "id": 55,
+              "image": "groupicon_motiondetector_value_1",
+              "name": "Bewegung & Präsenz",
+              "note": "",
+              "order": 18,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1515952780,
+              "category": 0,
+              "id": 68,
+              "image": "groupicon_star",
+              "name": "Modus ",
+              "note": "",
+              "order": 19,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1515936840,
+              "category": 0,
+              "id": 67,
+              "image": "groupicon_camera_value_1",
+              "name": "Urlaub",
+              "note": "",
+              "order": 20,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103120,
+              "category": 0,
+              "id": 62,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Wohnzimmerlicht",
+              "note": "",
+              "order": 21,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103145,
+              "category": 0,
+              "id": 63,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Küchenlicht",
+              "note": "",
+              "order": 22,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103162,
+              "category": 0,
+              "id": 64,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Schlafzimmerlicht",
+              "note": "",
+              "order": 23,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103182,
+              "category": 0,
+              "id": 65,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Eingangslicht",
+              "note": "",
+              "order": 24,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103212,
+              "category": 0,
+              "id": 66,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Bürolicht",
+              "note": "",
+              "order": 25,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1531862243,
+              "category": 0,
+              "id": 72,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Balkonlicht",
+              "note": "",
+              "order": 26,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644779547,
+              "category": 0,
+              "id": 79,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Spalicht",
+              "note": "",
+              "order": 27,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644779599,
+              "category": 0,
+              "id": 80,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Studiolicht",
+              "note": "",
+              "order": 28,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1724209891,
+              "category": 0,
+              "id": 82,
+              "image": "groupicon_dimmablebulb_value_5",
+              "name": "Guten Morgen",
+              "note": "",
+              "order": 29,
+              "owner": 6,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            }
+          ],
+          "on-off-group": "Successfully called \"on-off-group\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-groups"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "id": 2,
+                "value": "on"
+              },
+              "name": "on-off-group"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@homee turn off wohnzimmer",
+        "mocks": {
+          "get-groups": [
+            {
+              "added": 1439484980,
+              "category": 0,
+              "id": 2,
+              "image": "groupicon_armchair",
+              "name": "Wohnzimmer",
+              "note": "",
+              "order": 1,
+              "owner": 0,
+              "phonetic_name": "Wohnzimmer%2C%20Wohnzimmerlicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1449390443,
+              "category": 0,
+              "id": 19,
+              "image": "groupicon_pot",
+              "name": "Küche",
+              "note": "",
+              "order": 2,
+              "owner": 0,
+              "phonetic_name": "K%C3%BCche%2C%20K%C3%BCchenlicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644438102,
+              "category": 0,
+              "id": 77,
+              "image": "groupicon_speaker_value_1",
+              "name": "Studio",
+              "note": "",
+              "order": 3,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440241462,
+              "category": 0,
+              "id": 6,
+              "image": "groupicon_bed",
+              "name": "Schlafzimmer",
+              "note": "",
+              "order": 4,
+              "owner": 0,
+              "phonetic_name": "Schlafzimmer%2C%20Schlafzimmerlicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440241472,
+              "category": 0,
+              "id": 7,
+              "image": "groupicon_bathtub",
+              "name": "Bad",
+              "note": "",
+              "order": 5,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644779263,
+              "category": 0,
+              "id": 78,
+              "image": "groupicon_flooddetector",
+              "name": "Spa",
+              "note": "",
+              "order": 6,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440241484,
+              "category": 0,
+              "id": 8,
+              "image": "groupicon_suitcase",
+              "name": "Büro",
+              "note": "",
+              "order": 7,
+              "owner": 0,
+              "phonetic_name": "B%C3%BCro%2C%20B%C3%BCrolicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1655317298,
+              "category": 0,
+              "id": 81,
+              "image": "groupicon_teddy",
+              "name": "Kinderzimmer",
+              "note": "",
+              "order": 8,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1439557230,
+              "category": 0,
+              "id": 4,
+              "image": "groupicon_presence",
+              "name": "Eingang / Flur",
+              "note": "",
+              "order": 9,
+              "owner": 0,
+              "phonetic_name": "Eingang%2C%20Eingangslicht",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1501091843,
+              "category": 0,
+              "id": 58,
+              "image": "groupicon_sun",
+              "name": "Balkon",
+              "note": "",
+              "order": 10,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1439626843,
+              "category": 0,
+              "id": 5,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Licht",
+              "note": "",
+              "order": 11,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1440242312,
+              "category": 0,
+              "id": 9,
+              "image": "groupicon_co2",
+              "name": "Klima",
+              "note": "",
+              "order": 12,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1478629999,
+              "category": 0,
+              "id": 26,
+              "image": "groupicon_bolt",
+              "name": "Energie",
+              "note": "",
+              "order": 13,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1511697429,
+              "category": 0,
+              "id": 61,
+              "image": "groupicon_sun",
+              "name": "Wetter",
+              "note": "",
+              "order": 14,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1449390472,
+              "category": 0,
+              "id": 20,
+              "image": "groupicon_windowhandle_value_0",
+              "name": "Fenster ",
+              "note": "",
+              "order": 15,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1552022492,
+              "category": 0,
+              "id": 76,
+              "image": "groupicon_entrancedoor_value_0",
+              "name": "Türen",
+              "note": "",
+              "order": 16,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1494096332,
+              "category": 0,
+              "id": 45,
+              "image": "groupicon_twobuttonremote",
+              "name": "Schalter & Taster",
+              "note": "",
+              "order": 17,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1497983233,
+              "category": 0,
+              "id": 55,
+              "image": "groupicon_motiondetector_value_1",
+              "name": "Bewegung & Präsenz",
+              "note": "",
+              "order": 18,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1515952780,
+              "category": 0,
+              "id": 68,
+              "image": "groupicon_star",
+              "name": "Modus ",
+              "note": "",
+              "order": 19,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1515936840,
+              "category": 0,
+              "id": 67,
+              "image": "groupicon_camera_value_1",
+              "name": "Urlaub",
+              "note": "",
+              "order": 20,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103120,
+              "category": 0,
+              "id": 62,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Wohnzimmerlicht",
+              "note": "",
+              "order": 21,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103145,
+              "category": 0,
+              "id": 63,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Küchenlicht",
+              "note": "",
+              "order": 22,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103162,
+              "category": 0,
+              "id": 64,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Schlafzimmerlicht",
+              "note": "",
+              "order": 23,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103182,
+              "category": 0,
+              "id": 65,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Eingangslicht",
+              "note": "",
+              "order": 24,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1514103212,
+              "category": 0,
+              "id": 66,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Bürolicht",
+              "note": "",
+              "order": 25,
+              "owner": 0,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1531862243,
+              "category": 0,
+              "id": 72,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Balkonlicht",
+              "note": "",
+              "order": 26,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644779547,
+              "category": 0,
+              "id": 79,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Spalicht",
+              "note": "",
+              "order": 27,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1644779599,
+              "category": 0,
+              "id": 80,
+              "image": "groupicon_doublebulb_value_1_1",
+              "name": "Studiolicht",
+              "note": "",
+              "order": 28,
+              "owner": 5,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            },
+            {
+              "added": 1724209891,
+              "category": 0,
+              "id": 82,
+              "image": "groupicon_dimmablebulb_value_5",
+              "name": "Guten Morgen",
+              "note": "",
+              "order": 29,
+              "owner": 6,
+              "phonetic_name": "",
+              "services": 1,
+              "state": 1
+            }
+          ],
+          "on-off-group": "Successfully called \"on-off-group\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-groups"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "ID": 2,
+                "VALUE": "OFF"
+              },
+              "NAME": "ON-OFF-GROUP"
+            }
+          }
+        ]
+      }
+    ]
   }
 }
